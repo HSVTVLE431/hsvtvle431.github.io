@@ -1,13 +1,14 @@
-{bash:
+{if:{id}|=|1280537572443164726|then:no|else:{sh:
 load {iv}
-ffmpeg -i $FILE_1 -t 0.5 whar.ts
-ffmpeg -i whar.ts -vf eq=contrast=-1,lenscorrection=0.5:0.5:1:1,lenscorrection=0.5:0.5:-0.075:-0.25,crop=iw/1.25:ih/1.25,scale=iw*1.25:ih*1.25 -filter_complex "[0:a]rubberband=formant=712923000:pitch=2^(-10/12)[a1];[0:a]rubberband=formant=712923000:pitch=2^(9/12)[a2];[0:a]rubberband=formant=712923000:pitch=2^(14/12)[a3];[a1][a2][a3]amix=3,volume=3,atrim=0.02[outa]" -map 0:v -map "[outa]" 1.ts
-ffmpeg -i 1.ts -vf eq=contrast=-1,lenscorrection=0.5:0.5:1:1,lenscorrection=0.5:0.5:-0.075:-0.25,crop=iw/1.25:ih/1.25,scale=iw*1.25:ih*1.25 -filter_complex "[0:a]rubberband=formant=712923000:pitch=2^(-10/12)[a1];[0:a]rubberband=formant=712923000:pitch=2^(9/12)[a2];[0:a]rubberband=formant=712923000:pitch=2^(14/12)[a3];[a1][a2][a3]amix=3,volume=3,atrim=0.02[outa]" -map 0:v -map "[outa]" 2.ts
-ffmpeg -i 2.ts -vf eq=contrast=-1,lenscorrection=0.5:0.5:1:1,lenscorrection=0.5:0.5:-0.075:-0.25,crop=iw/1.25:ih/1.25,scale=iw*1.25:ih*1.25 -filter_complex "[0:a]rubberband=formant=712923000:pitch=2^(-10/12)[a1];[0:a]rubberband=formant=712923000:pitch=2^(9/12)[a2];[0:a]rubberband=formant=712923000:pitch=2^(14/12)[a3];[a1][a2][a3]amix=3,volume=3,atrim=0.02[outa]" -map 0:v -map "[outa]" 3.ts
-ffmpeg -i 3.ts -vf eq=contrast=-1,lenscorrection=0.5:0.5:1:1,lenscorrection=0.5:0.5:-0.075:-0.25,crop=iw/1.25:ih/1.25,scale=iw*1.25:ih*1.25 -filter_complex "[0:a]rubberband=formant=712923000:pitch=2^(-10/12)[a1];[0:a]rubberband=formant=712923000:pitch=2^(9/12)[a2];[0:a]rubberband=formant=712923000:pitch=2^(14/12)[a3];[a1][a2][a3]amix=3,volume=3,atrim=0.02[outa]" -map 0:v -map "[outa]" 4.ts
-ffmpeg -i 4.ts -vf eq=contrast=-1,lenscorrection=0.5:0.5:1:1,lenscorrection=0.5:0.5:-0.075:-0.25,crop=iw/1.25:ih/1.25,scale=iw*1.25:ih*1.25 -filter_complex "[0:a]rubberband=formant=712923000:pitch=2^(-10/12)[a1];[0:a]rubberband=formant=712923000:pitch=2^(9/12)[a2];[0:a]rubberband=formant=712923000:pitch=2^(14/12)[a3];[a1][a2][a3]amix=3,volume=3,atrim=0.02[outa]" -map 0:v -map "[outa]" 5.ts
-ffmpeg -i 5.ts -vf lenscorrection=0.5:0.5:-0.4:0.25 -af rubberband=pitch='2^(-2/12)' 6.ts
-ffmpeg -i 6.ts -vf lenscorrection=0.5:0.5:-0.4:0.25 -af rubberband=pitch='2^(-2/12)' 7.ts
-ffmpeg -i 7.ts -vf lenscorrection=0.5:0.5:-0.4:0.25 -af rubberband=pitch='2^(-2/12)' 8.ts
-ffmpeg -i 8.ts -vf lenscorrection=0.5:0.5:-0.4:0.25 -af rubberband=pitch='2^(-2/12)' 9.ts
-ffmpeg -i "concat:|1.ts|2.ts|3.ts|4.ts|5.ts|6.ts|7.ts|8.ts" ./output/ihatethegm74.mp4}
+
+ffmpeg -i $FILE_1 -vf eq=contrast=-1,lenscorrection=0.5:0.5:1:1,lenscorrection=0.5:0.5:-0.075:-0.25,crop=iw/1.25:ih/1.25,scale=iw*1.25:ih*1.25 -filter_complex "[0:a]rubberband=formant=712923000:pitch=2^(-10/12)[a1];[0:a]rubberband=formant=712923000:pitch=2^(9/12)[a2];[0:a]rubberband=formant=712923000:pitch=2^(14/12)[a3];[a1][a2][a3]amix=3,volume=3,atrim=0.02[outa]" -map 0:v -map "[outa]" -t 0.5 1.ts
+ffmpeg -i "1.ts" -vf eq=contrast=-1,lenscorrection=0.5:0.5:1:1,lenscorrection=0.5:0.5:-0.075:-0.25,crop=iw/1.25:ih/1.25,scale=iw*1.25:ih*1.25 -filter_complex "[0:a]rubberband=formant=712923000:pitch=2^(-10/12)[a1];[0:a]rubberband=formant=712923000:pitch=2^(9/12)[a2];[0:a]rubberband=formant=712923000:pitch=2^(14/12)[a3];[a1][a2][a3]amix=3,volume=3,atrim=0.02[outa]" -map 0:v -map "[outa]" -t 0.5 2.ts
+ffmpeg -i "2.ts" -vf eq=contrast=-1,lenscorrection=0.5:0.5:1:1,lenscorrection=0.5:0.5:-0.075:-0.25,crop=iw/1.25:ih/1.25,scale=iw*1.25:ih*1.25 -filter_complex "[0:a]rubberband=formant=712923000:pitch=2^(-10/12)[a1];[0:a]rubberband=formant=712923000:pitch=2^(9/12)[a2];[0:a]rubberband=formant=712923000:pitch=2^(14/12)[a3];[a1][a2][a3]amix=3,volume=3,atrim=0.02[outa]" -map 0:v -map "[outa]" -t 0.5 3.ts
+ffmpeg -i "3.ts" -vf eq=contrast=-1,lenscorrection=0.5:0.5:1:1,lenscorrection=0.5:0.5:-0.075:-0.25,crop=iw/1.25:ih/1.25,scale=iw*1.25:ih*1.25 -filter_complex "[0:a]rubberband=formant=712923000:pitch=2^(-10/12)[a1];[0:a]rubberband=formant=712923000:pitch=2^(9/12)[a2];[0:a]rubberband=formant=712923000:pitch=2^(14/12)[a3];[a1][a2][a3]amix=3,volume=3,atrim=0.02[outa]" -map 0:v -map "[outa]" -t 0.5 4.ts
+ffmpeg -i "4.ts" -vf eq=contrast=-1,lenscorrection=0.5:0.5:1:1,lenscorrection=0.5:0.5:-0.075:-0.25,crop=iw/1.25:ih/1.25,scale=iw*1.25:ih*1.25 -filter_complex "[0:a]rubberband=formant=712923000:pitch=2^(-10/12)[a1];[0:a]rubberband=formant=712923000:pitch=2^(9/12)[a2];[0:a]rubberband=formant=712923000:pitch=2^(14/12)[a3];[a1][a2][a3]amix=3,volume=3,atrim=0.02[outa]" -map 0:v -map "[outa]" -t 0.5 5.ts
+ffmpeg -i "5.ts" -vf lenscorrection=0.5:0.5:-0.4:0.25 -af rubberband=pitch='2^(-2/12)' -t 0.5 6.ts
+ffmpeg -i "6.ts" -vf lenscorrection=0.5:0.5:-0.4:0.25 -af rubberband=pitch='2^(-2/12)' -t 0.5 7.ts
+ffmpeg -i "7.ts" -vf lenscorrection=0.5:0.5:-0.4:0.25 -af rubberband=pitch='2^(-2/12)' -t 0.5 8.ts
+ffmpeg -i "8.ts" -vf lenscorrection=0.5:0.5:-0.4:0.25 -af rubberband=pitch='2^(-2/12)' -t 0.5 9.ts
+ffmpeg -i "concat:1.ts|2.ts|3.ts|4.ts|5.ts|6.ts|7.ts|8.ts|9.ts" ./output/ihtx.mp4}}
+.t sync

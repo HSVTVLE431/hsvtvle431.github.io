@@ -13,7 +13,7 @@ h=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default
 # file 1
 ffmpeg -i $FILE_1 -g 1080 -c:v libxvid -q:v 2 -c:a pcm_s16le 1.avi
 
-# file 2
+# file 2 updated
 ffmpeg -i $FILE_2 -g 1080 -c:v libxvid -q:v 2 -c:a pcm_s16le -vf pad="$w:$h" 2a.avi
 
 // tail

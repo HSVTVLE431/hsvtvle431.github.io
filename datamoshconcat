@@ -1,0 +1,21 @@
+{sh:
+load {arg:0}
+load {arg:1}
+// convert video into avi
+
+# file 1
+ffmpeg -i $FILE_1 -g 1080 -c:v mpeg4 -q:v 2 -c:a pcm_s16le 1.avi
+
+# file 2
+ffmpeg -i $FILE_1 -g 1080 -c:v mpeg4 -q:v 2 -c:a pcm_s16le 2a.avi
+
+// tail
+tail -c +20k 2a.avi >> 2.avi
+
+# concat the 2 files
+cat 1.avi 2.avi >> concat.avi
+
+// convert avi into video
+ffmpeg -i concat.avi -c:v libx264 -c:a aac -preset medium -b:a 192k ./output/datamosh.concat.mp4
+
+// done}

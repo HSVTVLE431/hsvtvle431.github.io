@@ -60,7 +60,7 @@ copy 19 20
 {replace:#|20|{args}}
 repeatduration 20 .483
 concatmultiple 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
-render 1}
+render 1} 
 -# made by hsvtvle431
 ———————— sync ————————
 use `.t sync` or `.t sync+` and `.t sync alt` or `.t sync+ alt`

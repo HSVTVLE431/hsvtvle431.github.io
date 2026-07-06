@@ -1,0 +1,35 @@
+{iscript:load {iv} 0
+copysnip 0 1 0 .483
+{replace:#|1|{args}}
+repeatduration 1 .483
+copy 1 2
+{replace:#|2|{args}}
+repeatduration 2 .483
+copy 2 3
+{replace:#|3|{args}}
+repeatduration 3 .483
+copy 3 4
+{replace:#|4|{args}}
+repeatduration 4 .483
+copy 4 5
+{replace:#|5|{args}}
+repeatduration 5 .483
+copy 5 6
+{replace:#|6|{args}}
+repeatduration 6 .483
+copy 6 7
+{replace:#|7|{args}}
+repeatduration 7 .483
+copy 7 8
+{replace:#|8|{args}}
+repeatduration 8 .483
+copy 8 9
+{replace:#|9|{args}}
+repeatduration 9 .483
+copy 9 10
+{replace:#|10|{args}}
+repeatduration 10 .483
+concatmultiple 1 2 3 4 5 6 7 8 9 10
+render 1}
+-# made by hsvtvle431
+

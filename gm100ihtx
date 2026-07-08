@@ -1,4 +1,4 @@
-load 0
+{iscript:load {iv} 0
 snip 0 0 0.5
 copy 0 1
 swaprgba 1 bgr
@@ -103,5 +103,53 @@ cover 7 0w 0h
 copy 7 72
 audiopitch 7 0.94
 audiopitch 72 0.74
-audioputmix 7 7
-coming soon...
+audioputmix 7 72
+snip 7 0 0d
+copy 7 8
+swaprgba 8 bgr
+hueshifthsvffmpeg 8 100 2
+haah 8
+rotate 8 90
+wave 8 0w/25 0w/3.8
+rotate 8 -90
+cover 8 0w 0h
+wave 8 0w/-35 0w/2
+cover 8 0w 0h
+copy 8 82
+audiopitch 8 0.94
+audiopitch 82 0.74
+audioputmix 8 82
+snip 8 0 0d
+copy 8 9
+swaprgba 9 bgr
+hueshifthsvffmpeg 9 100 2
+haah 9
+rotate 9 90
+wave 9 0w/25 0w/3.8
+rotate 9 -90
+cover 9 0w 0h
+wave 9 0w/-35 0w/2
+cover 9 0w 0h
+copy 9 92
+audiopitch 9 0.94
+audiopitch 92 0.74
+audioputmix 9 92
+snip 9 0 0d
+copy 9 10
+swaprgba 10 bgr
+hueshifthsvffmpeg 10 100 2
+haah 10
+rotate 10 90
+wave 10 0w/25 0w/3.8
+rotate 10 -90
+cover 10 0w 0h
+wave 10 0w/-35 0w/2
+cover 10 0w 0h
+copy 10 102
+audiopitch 10 0.94
+audiopitch 102 0.74
+audioputmix 10 102
+snip 10 0 0d
+copy 10 11
+concatmultiple 1 2 3 4 5 6 7 8 9 10
+render 1}

@@ -1,0 +1,107 @@
+load 0
+snip 0 0 0.5
+copy 0 1
+swaprgba 1 bgr
+hueshifthsvffmpeg 1 100 2
+haah 1
+rotate 1 90
+wave 1 0w/25 0w/3.8
+rotate 1 -90
+cover 1 0w 0h
+wave 1 0w/-35 0w/2
+cover 1 0w 0h
+copy 1 12
+audiopitch 1 0.94
+audiopitch 12 0.74
+audioputmix 1 12
+snip 1 0 0d
+copy 1 2
+swaprgba 2 bgr
+hueshifthsvffmpeg 2 100 2
+haah 2
+rotate 2 90
+wave 2 0w/25 0w/3.8
+rotate 2 -90
+cover 2 0w 0h
+wave 2 0w/-35 0w/2
+cover 2 0w 0h
+copy 2 22
+audiopitch 2 0.94
+audiopitch 22 0.74
+audioputmix 2 22
+snip 2 0 0d
+copy 2 3
+swaprgba 3 bgr
+hueshifthsvffmpeg 3 100 2
+haah 3
+rotate 3 90
+wave 3 0w/25 0w/3.8
+rotate 3 -90
+cover 3 0w 0h
+wave 3 0w/-35 0w/2
+cover 3 0w 0h
+copy 3 32
+audiopitch 3 0.94
+audiopitch 32 0.74
+audioputmix 3 32
+snip 3 0 0d
+copy 3 4
+swaprgba 4 bgr
+hueshifthsvffmpeg 4 100 2
+haah 4
+rotate 4 90
+wave 4 0w/25 0w/3.8
+rotate 4 -90
+cover 4 0w 0h
+wave 4 0w/-35 0w/2
+cover 4 0w 0h
+copy 4 42
+audiopitch 4 0.94
+audiopitch 42 0.74
+audioputmix 4 42
+snip 4 0 0d
+copy 4 5
+swaprgba 5 bgr
+hueshifthsvffmpeg 5 100 2
+haah 5
+rotate 5 90
+wave 5 0w/25 0w/3.8
+rotate 5 -90
+cover 5 0w 0h
+wave 5 0w/-35 0w/2
+cover 5 0w 0h
+copy 5 52
+audiopitch 5 0.94
+audiopitch 52 0.74
+audioputmix 5 52
+snip 5 0 0d
+copy 5 6
+swaprgba 6 bgr
+hueshifthsvffmpeg 6 100 2
+haah 6
+rotate 6 90
+wave 6 0w/25 0w/3.8
+rotate 6 -90
+cover 6 0w 0h
+wave 6 0w/-35 0w/2
+cover 6 0w 0h
+copy 6 62
+audiopitch 6 0.94
+audiopitch 62 0.74
+audioputmix 6 62
+snip 6 0 0d
+copy 6 7
+swaprgba 7 bgr
+hueshifthsvffmpeg 7 100 2
+haah 7
+rotate 7 90
+wave 7 0w/25 0w/3.8
+rotate 7 -90
+cover 7 0w 0h
+wave 7 0w/-35 0w/2
+cover 7 0w 0h
+copy 7 72
+audiopitch 7 0.94
+audiopitch 72 0.74
+audioputmix 7 7
+coming soon...

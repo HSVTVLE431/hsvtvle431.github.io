@@ -1,0 +1,1965 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>IHTX Builder</title>
+<script src="https://cdn.jsdelivr.net/npm/webm-muxer@5.1.2/build/webm-muxer.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg:#0c0e11;
+  --panel:#15181d;
+  --panel-2:#1b1f26;
+  --line:#262b33;
+  --amber:#f0b94e;
+  --amber-dim:#8a6a2c;
+  --teal:#3ddbd9;
+  --teal-dim:#1f6b6a;
+  --violet:#b98cf0;
+  --violet-dim:#5c4b7e;
+  --text:#eae7e0;
+  --muted:#868b94;
+  --danger:#e0654f;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;color:var(--text);font-family:'IBM Plex Mono',monospace;overflow-x:hidden;width:100%;max-width:100%;}
+body{
+  background:linear-gradient(120deg,#ff004c,#ff9900,#f9f002,#33ff00,#00fff2,#0066ff,#a600ff,#ff004c);
+  background-size:2200% 2200%;
+  animation:ihtxRainbow 26s ease infinite;
+}
+@keyframes ihtxRainbow{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+.wrap{background:var(--bg);border-radius:10px;box-shadow:0 0 0 1px rgba(255,255,255,0.05), 0 20px 60px rgba(0,0,0,0.55);}
+
+.wrap{max-width:980px;width:100%;margin:0 auto;padding:28px 16px 60px;overflow-x:hidden;}
+
+.masthead{display:flex;align-items:baseline;justify-content:space-between;border-bottom:2px solid var(--line);padding-bottom:14px;margin-bottom:22px;flex-wrap:wrap;gap:8px;}
+.masthead h1{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:2px;margin:0;line-height:1;color:var(--amber);text-shadow:0 0 22px rgba(240,185,78,0.25);}
+.masthead .sub{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+.masthead .tag{font-size:11px;color:var(--teal);border:1px solid var(--teal-dim);padding:4px 9px;border-radius:3px;letter-spacing:1px;white-space:nowrap;}
+.masthead .tag.engine-fast{color:var(--amber);border-color:var(--amber-dim);}
+
+/* timeline signature element */
+.timeline{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:14px 16px;margin-bottom:18px;}
+.timeline-row{display:flex;align-items:flex-start;gap:10px;min-height:34px;min-width:0;}
+.timeline-row + .timeline-row{margin-top:10px;}
+.timeline-label{width:78px;flex-shrink:0;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding-top:8px;}
+.track{flex:1;display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;padding:3px 0;min-height:28px;min-width:0;}
+.track-empty{font-size:11px;color:#454a53;font-style:italic;padding-top:6px;}
+.clip{display:flex;flex-direction:column;gap:4px;background:linear-gradient(180deg,#3a2f18,#241d0f);border:1px solid var(--amber-dim);color:var(--amber);font-size:11px;padding:7px 10px;border-radius:3px;flex-shrink:0;min-width:150px;}
+.clip.pitch{background:linear-gradient(180deg,#123a39,#0e2726);border:1px solid var(--teal-dim);color:var(--teal);min-width:120px;}
+.clip-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.clip .idx{opacity:0.55;font-size:9px;}
+.clip button.rm{all:unset;cursor:pointer;color:inherit;opacity:0.6;font-size:13px;line-height:1;padding:0 2px;}
+.clip button.rm:hover{opacity:1;color:var(--danger);}
+.clip .param-row{display:flex;align-items:center;gap:6px;}
+.clip .param-row input[type=range]{flex:1;accent-color:var(--amber);height:14px;}
+.clip.pitch .param-row input[type=range]{accent-color:var(--teal);}
+.clip .param-val{font-size:9.5px;opacity:0.75;min-width:34px;text-align:right;}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:760px){.grid{grid-template-columns:1fr;}}
+
+.panel{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:18px;}
+.panel h2{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin:0 0 3px;color:var(--text);}
+.panel .desc{font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5;}
+
+.chip-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.chip-btn{all:unset;cursor:pointer;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font-size:12px;padding:8px 10px;border-radius:4px;display:flex;align-items:center;gap:8px;transition:border-color .15s, background .15s;}
+.chip-btn:hover{border-color:var(--amber-dim);}
+.panel.pitchpanel .chip-btn:hover{border-color:var(--teal-dim);}
+.chip-btn .plus{width:16px;height:16px;border-radius:50%;background:var(--amber);color:#1a1305;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.panel.pitchpanel .chip-btn .plus{background:var(--teal);color:#04211f;}
+
+.custom-row{display:flex;gap:8px;margin-top:4px;}
+.custom-row input{flex:1;min-width:0;background:var(--panel-2);border:1px solid var(--line);color:var(--text);font-family:inherit;font-size:12px;padding:9px 10px;border-radius:4px;}
+.custom-row input:focus{outline:none;border-color:var(--amber);}
+.panel.pitchpanel .custom-row input:focus{border-color:var(--teal);}
+.custom-row button{all:unset;cursor:pointer;background:var(--amber);color:#1a1305;font-size:12px;font-weight:700;padding:9px 14px;border-radius:4px;letter-spacing:.5px;}
+.panel.pitchpanel .custom-row button{background:var(--teal);color:#04211f;}
+
+/* powers panel */
+.powers{border:1px solid var(--violet-dim);background:linear-gradient(180deg,#1a1522,#141019);border-radius:6px;padding:16px 18px;margin-bottom:18px;}
+.powers-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.powers h2{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin:0;color:var(--violet);}
+.powers .desc{font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5;}
+.powers-controls{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+.powers-field{display:flex;align-items:center;gap:8px;}
+.powers-field label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+.powers-field input[type=number]{width:64px;background:var(--panel-2);border:1px solid var(--line);color:var(--violet);font-family:inherit;font-size:14px;padding:6px 8px;border-radius:4px;text-align:center;}
+.powers-toggle{display:flex;border:1px solid var(--violet-dim);border-radius:4px;overflow:hidden;}
+.powers-toggle button{all:unset;cursor:pointer;font-size:11px;padding:8px 12px;color:var(--muted);}
+.powers-toggle button.active{background:var(--violet);color:#1a1024;}
+.powers-note{font-size:10px;color:#5c5468;margin-top:8px;}
+
+.upload-zone{border:1.5px dashed var(--line);border-radius:6px;padding:26px 16px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;margin-bottom:18px;background:var(--panel-2);}
+.upload-zone:hover{border-color:var(--amber);}
+.upload-zone.has-file{border-style:solid;border-color:var(--amber-dim);}
+.upload-zone .big{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--amber);margin-bottom:4px;}
+.upload-zone .small{font-size:11px;color:var(--muted);}
+input[type=file]{display:none;}
+
+video,canvas{max-width:100%;border-radius:4px;border:1px solid var(--line);display:block;background:#000;}
+
+.preview-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;}
+.preview-col{flex:1;min-width:220px;}
+.preview-col h3{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin:0 0 8px;}
+
+.process-bar{display:flex;align-items:center;gap:16px;margin-top:24px;border-top:2px solid var(--line);padding-top:20px;flex-wrap:wrap;}
+.process-btn{all:unset;cursor:pointer;background:linear-gradient(180deg,var(--amber),#c9902f);color:#1a1305;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;padding:12px 28px;border-radius:5px;box-shadow:0 4px 0 var(--amber-dim);}
+.process-btn:active{transform:translateY(2px);box-shadow:0 2px 0 var(--amber-dim);}
+.process-btn[disabled]{opacity:0.35;cursor:not-allowed;box-shadow:none;}
+.status{font-size:12px;color:var(--muted);flex:1;}
+.status.active{color:var(--teal);}
+.status.done{color:var(--amber);}
+
+.download-btn{all:unset;cursor:pointer;background:var(--teal);color:#04211f;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;padding:10px 22px;border-radius:5px;text-decoration:none;display:inline-block;}
+
+.progress-track{width:100%;height:4px;background:var(--panel-2);border-radius:2px;overflow:hidden;margin-top:6px;}
+.progress-fill{height:100%;background:var(--amber);width:0%;transition:width .2s;}
+
+footer.note{margin-top:26px;font-size:10.5px;color:#565b64;line-height:1.6;border-top:1px solid var(--line);padding-top:14px;}
+.afx-row-classic{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.afx-row-classic label{font-size:11px;color:var(--muted);width:64px;flex-shrink:0;}
+.afx-row-classic input[type=range]{flex:1;accent-color:var(--teal);}
+.afx-row-classic span{font-size:11px;color:var(--teal);width:44px;text-align:right;flex-shrink:0;}
+
+/* ---- red mobile app shell ---- */
+.app-shell{background:#e30000;border-radius:14px;padding:18px 16px 22px;margin-bottom:26px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.08);}
+.app-topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px;}
+.help-box{background:#fff;color:#111;font-size:13px;font-weight:600;padding:12px 16px;border-radius:6px;max-width:220px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,0.15);}
+.dl-icon-btn{all:unset;cursor:pointer;background:#ff9d1f;color:#3a1e00;width:46px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:18px;box-shadow:0 3px 0 #c97400;flex-shrink:0;}
+.dl-icon-btn[disabled]{opacity:.4;cursor:not-allowed;}
+.video-stage{background:#fff;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:160px;margin-bottom:10px;position:relative;}
+.video-stage video{width:100%;max-height:340px;display:block;background:#000;border:none;border-radius:0;}
+.video-stage .stage-empty{padding:40px 20px;text-align:center;color:#999;font-size:13px;}
+.playpause-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.pp-btn{all:unset;cursor:pointer;color:#111;background:#fff;width:44px;height:36px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.timer-badge{background:#2a0000;color:#ffcfcf;font-size:11px;padding:6px 10px;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;text-align:center;}
+.fx-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.fx-row .see-all{color:#fff;font-size:15px;font-weight:600;opacity:.9;cursor:pointer;}
+.fx-thumb{width:54px;height:54px;background:#fff;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;cursor:pointer;}
+.videofx-btn{all:unset;cursor:pointer;background:#ff9d1f;color:#3a1e00;font-size:12px;font-weight:700;padding:9px 14px;border-radius:5px;letter-spacing:.5px;}
+.side-menu{display:flex;flex-direction:column;gap:8px;max-width:220px;margin-bottom:14px;}
+.side-btn{all:unset;cursor:pointer;background:#ff9d1f;color:#3a1e00;font-size:13px;font-weight:600;padding:10px 14px;border-radius:5px;text-align:left;}
+.side-btn.active{background:#fff;}
+.hide-toggle-btn{all:unset;cursor:pointer;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;margin-top:4px;}
+.exports-badge{display:inline-block;background:#ff9d1f;color:#3a1e00;font-size:12px;font-weight:700;padding:8px 14px;border-radius:5px;margin-top:6px;}
+.ov-panel{display:none;background:#fff5f0;color:#1a0a02;border-radius:8px;padding:14px 16px;margin-top:12px;}
+.ov-panel.open{display:block;}
+.ov-panel h3{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin:0 0 6px;color:#c40000;}
+.ov-panel .desc{font-size:11.5px;color:#5a4038;margin-bottom:10px;line-height:1.5;}
+.ov-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.ov-row label{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#7a4a3a;min-width:80px;}
+.ov-row input[type=range]{flex:1;accent-color:#e30000;min-width:120px;}
+.ov-row .ov-val{font-size:11.5px;color:#c40000;min-width:44px;text-align:right;}
+.ov-toggle{display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:10px;}
+.ov-toggle input{accent-color:#e30000;width:16px;height:16px;}
+#classicPanels .panel, #classicPanels .timeline, #classicPanels .powers{background:var(--panel);}
+.classic-wrap{display:none;}
+.classic-wrap.open{display:block;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <h1>IHTX BUILDER</h1>
+      <div class="sub">cadena de efectos + acorde de pitch + powers &middot; estilo Vegas Pro / ffmpeg</div>
+    </div>
+    <div class="tag">TODO SE PROCESA EN TU NAVEGADOR</div>
+  </div>
+  <div class="tag" id="engineTag" style="margin-bottom:18px;display:inline-block;">detectando motor de procesamiento...</div>
+
+  <div class="timeline">
+    <div class="timeline-row">
+      <div class="timeline-label">Video FX</div>
+      <div class="track" id="videoTrack"><span class="track-empty">sin efectos — agregá abajo con el +</span></div>
+    </div>
+    <div class="timeline-row">
+      <div class="timeline-label">Pitch</div>
+      <div class="track" id="pitchTrack"><span class="track-empty">sin voces de pitch — agregá abajo con el +</span></div>
+    </div>
+  </div>
+
+  <div class="powers">
+    <div class="powers-head"><h2>POWERS</h2></div>
+    <div class="desc">Multiplica la cadena de arriba en niveles: nivel 1 = efectos+pitch aplicados una vez, nivel 2 = aplicados dos veces en cadena sobre el resultado anterior, etc.</div>
+    <div class="powers-controls">
+      <div class="powers-field">
+        <label>Niveles</label>
+        <input type="number" id="levelsInput" min="1" max="10" value="10">
+      </div>
+      <div class="powers-toggle" id="powersToggle">
+        <button data-mode="single">Solo nivel N (compuesto)</button>
+        <button data-mode="concat" class="active">Concatenar 1→N</button>
+      </div>
+    </div>
+    <div class="powers-note">"Solo nivel N": un clip de la misma duración con el efecto aplicado N veces. "Concatenar 1→N": nivel 1, luego nivel 2, ... nivel N, uno atrás del otro (dura N veces más).</div>
+  </div>
+
+  <div class="upload-zone" id="dropZone">
+    <div class="big" id="uploadLabel">SUBÍ TU VIDEO</div>
+    <div class="small">click para elegir un archivo (mp4, webm, mov)</div>
+    <input type="file" id="fileInput" accept="video/*">
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>Efectos (Vegas Pro / ffmpeg)</h2>
+      <div class="desc">Cada click en + agrega el efecto al final de la cadena, con su propio control de intensidad — se puede repetir el mismo efecto para multiplicarlo.</div>
+      <div class="chip-grid" id="effectChips"></div>
+      <div class="custom-row">
+        <input type="text" id="customEffectInput" placeholder="otro (ej: hue-rotate(90deg), blur(4px), brightness(1.6))">
+        <button id="addCustomEffect">+ agregar</button>
+      </div>
+    </div>
+
+    <div class="panel pitchpanel">
+      <h2>Pitch (Vegas Pro) — hasta ±100</h2>
+      <div class="desc">Cada + agrega una voz de pitch (semitonos) que se mezcla con las demás, formando un acorde tipo G Major.</div>
+      <div class="chip-grid" id="pitchChips"></div>
+      <div class="custom-row">
+        <input type="number" id="customPitchInput" placeholder="otro (semitonos, ej: -3, 4.5, 19, 100)" step="0.5" min="-100" max="100">
+        <button id="addCustomPitch">+ agregar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:20px;">
+    <h2>AudioFx</h2>
+    <div class="desc">Track noise gate, track EQ, IL Vocoder y vibrato — procesadores de audio adicionales aplicados al buffer final, antes de mezclar con el video.</div>
+    <div class="grid" style="gap:20px;">
+      <div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:4px;color:var(--text);"><input type="checkbox" id="ngEnabled" style="accent-color:var(--teal);width:16px;height:16px;"> Track Noise Gate</label>
+        <div class="afx-row-classic"><label>Umbral</label><input type="range" id="ngThreshold" min="-60" max="0" value="-32" step="1"><span id="ngThresholdVal">-32dB</span></div>
+      </div>
+      <div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:4px;color:var(--text);"><input type="checkbox" id="eqEnabled" style="accent-color:var(--teal);width:16px;height:16px;"> Track EQ</label>
+        <div class="afx-row-classic"><label>Graves</label><input type="range" id="eqLow" min="-24" max="24" value="0" step="1"><span id="eqLowVal">0dB</span></div>
+        <div class="afx-row-classic"><label>Medios</label><input type="range" id="eqMid" min="-24" max="24" value="0" step="1"><span id="eqMidVal">0dB</span></div>
+        <div class="afx-row-classic"><label>Agudos</label><input type="range" id="eqHigh" min="-24" max="24" value="0" step="1"><span id="eqHighVal">0dB</span></div>
+      </div>
+      <div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:4px;color:var(--text);"><input type="checkbox" id="vocEnabled" style="accent-color:var(--teal);width:16px;height:16px;"> IL Vocoder</label>
+        <div class="afx-row-classic"><label>Carrier</label><input type="range" id="vocCarrier" min="40" max="440" value="110" step="1"><span id="vocCarrierVal">110Hz</span></div>
+        <div class="afx-row-classic"><label>Mezcla</label><input type="range" id="vocMix" min="0" max="100" value="70" step="1"><span id="vocMixVal">70%</span></div>
+      </div>
+      <div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:4px;color:var(--text);"><input type="checkbox" id="vibEnabled" style="accent-color:var(--teal);width:16px;height:16px;"> Vibrato</label>
+        <div class="afx-row-classic"><label>Velocidad</label><input type="range" id="vibRate" min="0.5" max="12" value="5" step="0.5"><span id="vibRateVal">5Hz</span></div>
+        <div class="afx-row-classic"><label>Profundidad</label><input type="range" id="vibDepth" min="0" max="15" value="4" step="0.5"><span id="vibDepthVal">4ms</span></div>
+      </div>
+    </div>
+    <div class="desc" id="audioFxSummary" style="margin-top:12px;">noise gate: off &middot; EQ: off &middot; vocoder: off &middot; vibrato: off</div>
+  </div>
+
+  <div class="process-bar">
+    <button class="process-btn" id="processBtn" disabled>PROCESAR VIDEO</button>
+    <div style="flex:1">
+      <div class="status" id="statusText">subí un video para empezar</div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+      <label style="font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">VOL</label>
+      <input type="range" id="volumeSlider" min="0" max="300" value="100" step="5" style="width:90px;accent-color:var(--amber);">
+      <span id="volumeVal" style="font-size:12px;color:var(--amber);width:38px;">100%</span>
+    </div>
+  </div>
+
+  <div style="border:1px solid var(--violet-dim);background:linear-gradient(180deg,#1a1522,#141019);border-radius:6px;padding:14px 16px;margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+    <div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--violet);letter-spacing:1px;">LUT (.cube)</div>
+      <div style="font-size:11px;color:var(--muted);">se aplica encima de todos los efectos de video</div>
+    </div>
+    <label id="lutZone" style="cursor:pointer;border:1px dashed var(--violet-dim);padding:8px 14px;border-radius:4px;font-size:12px;color:var(--violet);background:var(--panel-2);white-space:nowrap;">
+      <span id="lutLabel">+ subir .cube</span>
+      <input type="file" id="lutInput" accept=".cube" style="display:none;">
+    </label>
+    <button id="lutClear" style="all:unset;cursor:pointer;font-size:11px;color:var(--danger);display:none;">✕ quitar LUT</button>
+  </div>
+
+  <div class="preview-row">
+    <div class="preview-col">
+      <h3>Original</h3>
+      <video id="srcPreview" controls muted></video>
+    </div>
+    <div class="preview-col">
+      <h3>Resultado</h3>
+      <canvas id="workCanvas"></canvas>
+      <div id="resultBox" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <footer class="note">
+    Fisheye, aberración cromática, Bratxon G Major 74, las Wave, los espejados (Flop/Flip/Right split) y los ajustes de Levels/Curves/Color Balance/Vibrance/Threshold/Sharpen/Emboss/Glow/Radial Blur/Lens Flare/Lab se calculan pixel/fila por pixel/fila en un canvas; el resto de los efectos usan filtros CSS compuestos (mismo enfoque que un LUT/filtro en Vegas Pro), cada uno con su slider de intensidad. Bratxon G Major 74 replica una cadena geq de ffmpeg de doble lente (curvatura amplia + pinch central). Wave horizontal/vertical usan un solo slider de tamaño: chico = ondas cortas y sutiles, grande = ondas amplias y marcadas. Flop espeja izquierda-derecha, Flip espeja arriba-abajo, y Right split refleja la parte derecha del cuadro hacia la izquierda desde un punto de corte ajustable. El pitch se hace con un pitch-shifter granular (overlap-add) por voz, mezclado como acorde, con voces de hasta ±100 semitonos estilo Vegas Pro. Powers reaplica la cadena completa (efectos + pitch) en cadena N veces. Track noise gate (gate real con envolvente), track EQ (3 bandas), IL Vocoder (multibanda) y vibrato (delay-line) son procesadores de audio adicionales aplicados al buffer final antes de mezclar con el video. Más niveles y más efectos = más tiempo de procesamiento, todo corriendo en tu navegador. La descarga es un .webm (video VP9 + audio Opus) — se puede convertir a mp4 en el chat si lo necesitás.
+  </footer>
+
+</div>
+
+<script>
+const EFFECTS = [
+  {label:'Fisheye', kind:'fisheye', min:0,max:100,step:1, unit:'', def:50},
+  {label:'Invertir color', kind:'filter', min:0,max:100,step:1, unit:'%', def:100, build:v=>`invert(${v/100})`},
+  {label:'VHS retro', kind:'filter', min:0,max:100,step:1, unit:'%', def:50, build:v=>`contrast(${1+v/100*0.3}) saturate(${1+v/100*0.6}) sepia(${v/200})`, overlay:'scanlines'},
+  {label:'Blanco y negro', kind:'filter', min:0,max:100,step:1, unit:'%', def:100, build:v=>`grayscale(${v/100})`},
+  {label:'Sepia', kind:'filter', min:0,max:100,step:1, unit:'%', def:100, build:v=>`sepia(${v/100})`},
+  {label:'Aberración cromática', kind:'chroma', min:0,max:20,step:1, unit:'px', def:6},
+  {label:'Alto contraste', kind:'filter', min:0,max:100,step:1, unit:'%', def:40, build:v=>`contrast(${1+v/100}) saturate(${1+v/100})`},
+  {label:'Desenfoque', kind:'filter', min:0,max:15,step:0.5, unit:'px', def:2, build:v=>`blur(${v}px)`},
+  {label:'Brillo', kind:'filter', min:-80,max:150,step:5, unit:'%', def:30, build:v=>`brightness(${1+v/100})`},
+  {label:'Glitch', kind:'glitch', min:1,max:20,step:1, unit:'cortes', def:6},
+  {label:'Hue', kind:'filter', min:0,max:360,step:5, unit:'°', def:90, build:v=>`hue-rotate(${v}deg)`},
+  {label:'Bratxon G Major 74', kind:'bratxon', min:0,max:100,step:1, unit:'%', def:100},
+  {label:'Wave horizontal', kind:'wavex', min:0,max:100,step:1, unit:'', def:40},
+  {label:'Wave vertical', kind:'wavey', min:0,max:100,step:1, unit:'', def:40},
+  {label:'Flop (espejo horizontal)', kind:'flop', min:0,max:100,step:1, unit:'%', def:100},
+  {label:'Flip (espejo vertical)', kind:'flip', min:0,max:100,step:1, unit:'%', def:100},
+  {label:'Right split (espejo desde el centro)', kind:'rightsplit', min:5,max:95,step:1, unit:'%', def:50},
+  {label:'Saturación', kind:'filter', min:0,max:300,step:5, unit:'%', def:150, build:v=>`saturate(${v/100})`},
+  {label:'Vignette', kind:'vignette', min:0,max:100,step:1, unit:'%', def:60},
+  {label:'Grano / Noise', kind:'noise', min:0,max:100,step:1, unit:'%', def:30},
+  {label:'Pixelate', kind:'pixelate', min:0,max:100,step:1, unit:'', def:35},
+  {label:'Zoom', kind:'zoom', min:0,max:150,step:1, unit:'%', def:30},
+  {label:'Rotar', kind:'rotate', min:0,max:360,step:1, unit:'°', def:15},
+  {label:'Solarize', kind:'solarize', min:0,max:100,step:1, unit:'%', def:50},
+  {label:'Posterize', kind:'posterize', min:0,max:100,step:1, unit:'%', def:60},
+
+  // ---- Adjust (Vegas Pro 23 "Adjust" category) ----
+  {label:'Levels', kind:'levels', min:0,max:100,step:1, unit:'%', def:30},
+  {label:'Curves (S-curve)', kind:'curves', min:0,max:100,step:1, unit:'%', def:40},
+  {label:'Color Balance (Cálido/Frío)', kind:'colorbalance', min:-100,max:100,step:1, unit:'', def:35},
+  {label:'Tinte (Verde/Magenta)', kind:'tint', min:-100,max:100,step:1, unit:'', def:0},
+  {label:'White Balance', kind:'whitebalance', min:-100,max:100,step:1, unit:'', def:0},
+  {label:'Vibrance', kind:'vibrance', min:0,max:200,step:5, unit:'%', def:80},
+  {label:'Threshold', kind:'threshold', min:0,max:100,step:1, unit:'%', def:50},
+
+  // ---- Blur & Sharpen / Stylize (Vegas Pro 23) ----
+  {label:'Sharpen', kind:'sharpen', min:0,max:100,step:1, unit:'%', def:50},
+  {label:'Emboss', kind:'emboss', min:0,max:100,step:1, unit:'%', def:60},
+  {label:'Glow', kind:'glow', min:0,max:100,step:1, unit:'%', def:50},
+  {label:'Radial Blur (Zoom Blur)', kind:'radialblur', min:0,max:100,step:1, unit:'%', def:30},
+  {label:'Lens Flare', kind:'lensflare', min:0,max:100,step:1, unit:'%', def:60},
+
+  // ---- Color Lab (L*a*b) ----
+  {label:'Lab Contraste', kind:'labcontrast', min:0,max:100,step:1, unit:'%', def:40},
+  {label:'Lab Color Grade (Teal & Orange)', kind:'labgrade', min:0,max:100,step:1, unit:'%', def:50},
+];
+
+const PITCHES = [
+  {label:'-100 st', semitones:-100},
+  {label:'-80 st', semitones:-80},
+  {label:'-60 st', semitones:-60},
+  {label:'-48 st', semitones:-48},
+  {label:'-36 st', semitones:-36},
+  {label:'-24 st (2 8vas abajo)', semitones:-24},
+  {label:'-12 st (8va abajo)', semitones:-12},
+  {label:'-10 st', semitones:-10},
+  {label:'-7 st', semitones:-7},
+  {label:'-5 st', semitones:-5},
+  {label:'+5 st', semitones:5},
+  {label:'+7 st', semitones:7},
+  {label:'+9 st', semitones:9},
+  {label:'+12 st (8va arriba)', semitones:12},
+  {label:'+14 st', semitones:14},
+  {label:'+24 st (2 8vas arriba)', semitones:24},
+  {label:'+36 st', semitones:36},
+  {label:'+48 st', semitones:48},
+  {label:'+60 st', semitones:60},
+  {label:'+80 st', semitones:80},
+  {label:'+100 st', semitones:100},
+];
+
+let videoFile = null;
+let effectChain = [];
+let pitchChain = [];
+let uid = 0;
+let powersMode = 'concat';
+
+const effectChipsEl = document.getElementById('effectChips');
+const pitchChipsEl = document.getElementById('pitchChips');
+const videoTrackEl = document.getElementById('videoTrack');
+const pitchTrackEl = document.getElementById('pitchTrack');
+const processBtn = document.getElementById('processBtn');
+const statusText = document.getElementById('statusText');
+const progressFill = document.getElementById('progressFill');
+const levelsInput = document.getElementById('levelsInput');
+const powersToggle = document.getElementById('powersToggle');
+
+powersToggle.querySelectorAll('button').forEach(b=>{
+  b.onclick = ()=>{
+    powersToggle.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    powersMode = b.dataset.mode;
+  };
+});
+
+EFFECTS.forEach(eff=>{
+  const b = document.createElement('button');
+  b.className='chip-btn';
+  b.innerHTML = `<span class="plus">+</span> ${eff.label}`;
+  b.onclick = ()=> addEffect({...eff, param: eff.def});
+  effectChipsEl.appendChild(b);
+});
+
+PITCHES.forEach(p=>{
+  const b = document.createElement('button');
+  b.className='chip-btn';
+  b.innerHTML = `<span class="plus">+</span> ${p.label}`;
+  b.onclick = ()=> addPitch({...p});
+  pitchChipsEl.appendChild(b);
+});
+
+document.getElementById('addCustomEffect').onclick = ()=>{
+  const input = document.getElementById('customEffectInput');
+  const v = input.value.trim();
+  if(!v) return;
+  addEffect({label:v, kind:'filter', value:v, build:()=>v});
+  input.value='';
+};
+
+document.getElementById('addCustomPitch').onclick = ()=>{
+  const input = document.getElementById('customPitchInput');
+  let v = parseFloat(input.value);
+  if(isNaN(v)) return;
+  v = Math.max(-100, Math.min(100, v));
+  addPitch({label:`${v>0?'+':''}${v} st`, semitones:v});
+  input.value='';
+};
+
+function addEffect(eff){
+  eff.id = uid++;
+  effectChain.push(eff);
+  renderChains();
+}
+function addPitch(p){
+  p.id = uid++;
+  pitchChain.push(p);
+  renderChains();
+}
+function removeEffect(id){
+  effectChain = effectChain.filter(e=>e.id!==id);
+  renderChains();
+}
+function removePitch(id){
+  pitchChain = pitchChain.filter(p=>p.id!==id);
+  renderChains();
+}
+
+function renderChains(){
+  videoTrackEl.innerHTML='';
+  if(effectChain.length===0){
+    videoTrackEl.innerHTML = '<span class="track-empty">sin efectos — agregá abajo con el +</span>';
+  } else {
+    effectChain.forEach((eff,i)=>{
+      const c = document.createElement('div');
+      c.className='clip';
+      const hasSlider = eff.min!==undefined;
+      c.innerHTML = `
+        <div class="clip-top"><span><span class="idx">${i+1}</span> ${eff.label}</span><button class="rm" title="quitar">&times;</button></div>
+        ${hasSlider ? `<div class="param-row">
+          <input type="range" min="${eff.min}" max="${eff.max}" step="${eff.step}" value="${eff.param}">
+          <span class="param-val">${eff.param}${eff.unit}</span>
+        </div>` : ''}
+      `;
+      c.querySelector('.rm').onclick=()=>removeEffect(eff.id);
+      if(hasSlider){
+        const range = c.querySelector('input[type=range]');
+        const valSpan = c.querySelector('.param-val');
+        range.oninput = ()=>{
+          eff.param = parseFloat(range.value);
+          valSpan.textContent = eff.param + eff.unit;
+        };
+      }
+      videoTrackEl.appendChild(c);
+    });
+  }
+  pitchTrackEl.innerHTML='';
+  if(pitchChain.length===0){
+    pitchTrackEl.innerHTML = '<span class="track-empty">sin voces de pitch — agregá abajo con el +</span>';
+  } else {
+    pitchChain.forEach((p,i)=>{
+      const c = document.createElement('div');
+      c.className='clip pitch';
+      c.innerHTML = `<div class="clip-top"><span><span class="idx">${i+1}</span> ${p.label}</span><button class="rm" title="quitar">&times;</button></div>`;
+      c.querySelector('.rm').onclick=()=>removePitch(p.id);
+      pitchTrackEl.appendChild(c);
+    });
+  }
+  checkReady();
+}
+
+function checkReady(){
+  processBtn.disabled = !videoFile;
+}
+
+// ---- upload ----
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const uploadLabel = document.getElementById('uploadLabel');
+const srcPreview = document.getElementById('srcPreview');
+
+dropZone.onclick = ()=> fileInput.click();
+fileInput.onchange = (e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  videoFile = f;
+  dropZone.classList.add('has-file');
+  uploadLabel.textContent = f.name.toUpperCase();
+  srcPreview.src = URL.createObjectURL(f);
+  srcPreview.style.display='block';
+  statusText.textContent = 'listo para procesar';
+  checkReady();
+};
+
+
+// ---- WebGL GPU pipeline ----
+const glCanvas = document.createElement('canvas');
+const gl = glCanvas.getContext('webgl', {preserveDrawingBuffer:true});
+
+function compileShader(gl, type, src){
+  const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); return s;
+}
+function makeProgram(gl, vsrc, fsrc){
+  const p=gl.createProgram();
+  gl.attachShader(p,compileShader(gl,gl.VERTEX_SHADER,vsrc));
+  gl.attachShader(p,compileShader(gl,gl.FRAGMENT_SHADER,fsrc));
+  gl.linkProgram(p); return p;
+}
+
+const VS = `attribute vec2 a_pos;varying vec2 v_uv;void main(){v_uv=a_pos*0.5+0.5;gl_Position=vec4(a_pos,0,1);}`;
+
+const FS_FISHEYE = `precision mediump float;
+uniform sampler2D u_tex;uniform float u_strength;varying vec2 v_uv;
+void main(){
+  vec2 uv=v_uv*2.0-1.0;
+  float r=length(uv);
+  float maxR=1.0;
+  vec2 distorted=uv;
+  if(r<maxR){
+    float norm=r/maxR;
+    float exp_=2.4-(u_strength)*1.9;
+    float newR=pow(norm,exp_)*maxR;
+    distorted=normalize(uv)*newR;
+  }
+  vec2 tc=distorted*0.5+0.5;
+  if(tc.x<0.0||tc.x>1.0||tc.y<0.0||tc.y>1.0){gl_FragColor=vec4(0,0,0,1);return;}
+  gl_FragColor=texture2D(u_tex,tc);
+}`;
+
+const FS_CHROMA = `precision mediump float;
+uniform sampler2D u_tex;uniform float u_amount;uniform vec2 u_res;varying vec2 v_uv;
+void main(){
+  vec2 off=vec2(u_amount/u_res.x,0.0);
+  float r=texture2D(u_tex,v_uv+off).r;
+  float g=texture2D(u_tex,v_uv).g;
+  float b=texture2D(u_tex,v_uv-off).b;
+  float a=texture2D(u_tex,v_uv).a;
+  gl_FragColor=vec4(r,g,b,a);
+}`;
+
+const FS_PASS = `precision mediump float;uniform sampler2D u_tex;varying vec2 v_uv;void main(){gl_FragColor=texture2D(u_tex,v_uv);}`;
+
+const progFisheye = gl ? makeProgram(gl, VS, FS_FISHEYE) : null;
+const progChroma  = gl ? makeProgram(gl, VS, FS_CHROMA)  : null;
+const progPass    = gl ? makeProgram(gl, VS, FS_PASS)    : null;
+
+let glTex = null;
+let glFbo = null;
+let glFboTex = null;
+
+function glSetup(W,H){
+  if(!gl) return;
+  glCanvas.width=W; glCanvas.height=H;
+  gl.viewport(0,0,W,H);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  if(!glTex){ glTex=gl.createTexture(); }
+  if(!glFboTex){ glFboTex=gl.createTexture(); }
+  gl.bindTexture(gl.TEXTURE_2D,glFboTex);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,W,H,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  if(!glFbo){ glFbo=gl.createFramebuffer(); }
+  gl.bindFramebuffer(gl.FRAMEBUFFER,glFbo);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,glFboTex,0);
+  gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+}
+
+function glDrawProg(prog, texSrc, W, H, uniforms){
+  gl.useProgram(prog);
+  const posLoc=gl.getAttribLocation(prog,'a_pos');
+  gl.enableVertexAttribArray(posLoc);
+  gl.vertexAttribPointer(posLoc,2,gl.FLOAT,false,0,0);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D,texSrc);
+  gl.uniform1i(gl.getUniformLocation(prog,'u_tex'),0);
+  if(uniforms) uniforms(prog);
+  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+}
+
+function sourceToGLTex(source){
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.bindTexture(gl.TEXTURE_2D,glTex);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,source);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+}
+
+function glEffectToCanvas(source, prog, W, H, uniforms){
+  // render to FBO
+  sourceToGLTex(source);
+  gl.bindFramebuffer(gl.FRAMEBUFFER,glFbo);
+  glDrawProg(prog,glTex,W,H,uniforms);
+  // blit FBO → screen canvas → 2d canvas
+  gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+  glDrawProg(progPass,glFboTex,W,H,null);
+  const out=getScratchCanvas(W,H);
+  out.getContext('2d').clearRect(0,0,W,H);
+  out.getContext('2d').drawImage(glCanvas,0,0);
+  return out;
+}
+
+let glInitW=0,glInitH=0;
+
+// ---- scratch canvas pool (avoids re-allocating a canvas per effect/frame) ----
+const scratchPool = [];
+function getScratchCanvas(w,h){
+  let c = scratchPool.pop();
+  if(!c) c = document.createElement('canvas');
+  if(c.width!==w) c.width=w;
+  if(c.height!==h) c.height=h;
+  return c;
+}
+function releaseScratchCanvas(c){
+  if(c && scratchPool.length<12) scratchPool.push(c);
+}
+
+// ---- effect pixel routines ----
+function applyFilterEffect(source, eff){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.filter = eff.build ? eff.build(eff.param) : (eff.value||'none');
+  ctx.drawImage(source,0,0);
+  ctx.filter='none';
+  if(eff.overlay==='scanlines'){
+    ctx.fillStyle='rgba(0,0,0,0.12)';
+    for(let y=0;y<H;y+=3) ctx.fillRect(0,y,W,1);
+  }
+  return out;
+}
+
+function applyFisheye(source, param){
+  const W=source.width,H=source.height;
+  if(gl){
+    if(W!==glInitW||H!==glInitH){ glSetup(W,H); glInitW=W; glInitH=H; }
+    const strength=param/100;
+    return glEffectToCanvas(source,progFisheye,W,H,(prog)=>{
+      gl.uniform1f(gl.getUniformLocation(prog,'u_strength'),strength);
+    });
+  }
+  // CPU fallback
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  const srcData=source.getContext('2d').getImageData(0,0,W,H);
+  const dstData=ctx.createImageData(W,H);
+  const cx=W/2,cy=H/2,radius=Math.min(W,H)/2;
+  const exp=2.4-(param/100)*1.9;
+  const sArr=srcData.data,dArr=dstData.data;
+  for(let y=0;y<H;y++){for(let x=0;x<W;x++){
+    const dx=x-cx,dy=y-cy,dist=Math.sqrt(dx*dx+dy*dy);
+    let sx=x,sy=y;
+    if(dist>0&&dist<=radius){const norm=dist/radius,th=Math.atan2(dy,dx),nr=Math.pow(norm,exp)*radius;sx=cx+Math.cos(th)*nr;sy=cy+Math.sin(th)*nr;}
+    sx=Math.max(0,Math.min(W-1,Math.round(sx)));sy=Math.max(0,Math.min(H-1,Math.round(sy)));
+    const si=(sy*W+sx)*4,di=(y*W+x)*4;
+    dArr[di]=sArr[si];dArr[di+1]=sArr[si+1];dArr[di+2]=sArr[si+2];dArr[di+3]=sArr[si+3];
+  }}
+  ctx.putImageData(dstData,0,0);
+  return out;
+}
+
+function applyChroma(source, amount){
+  const W=source.width,H=source.height;
+  if(gl){
+    if(W!==glInitW||H!==glInitH){ glSetup(W,H); glInitW=W; glInitH=H; }
+    return glEffectToCanvas(source,progChroma,W,H,(prog)=>{
+      gl.uniform1f(gl.getUniformLocation(prog,'u_amount'),amount);
+      gl.uniform2f(gl.getUniformLocation(prog,'u_res'),W,H);
+    });
+  }
+  // CSS fallback
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0);
+  ctx.globalCompositeOperation='screen';
+  const tmp=getScratchCanvas(W,H);
+  const tc=tmp.getContext('2d');
+  tc.clearRect(0,0,W,H);
+  tc.drawImage(source,amount,0);
+  tc.globalCompositeOperation='multiply';
+  tc.fillStyle='rgb(255,0,0)';tc.fillRect(0,0,W,H);
+  ctx.drawImage(tmp,0,0);
+  ctx.globalCompositeOperation='source-over';
+  releaseScratchCanvas(tmp);
+  return out;
+}
+
+function applyGlitch(source, slices){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0);
+  for(let i=0;i<slices;i++){
+    const sy=Math.floor(Math.random()*H);
+    const sh=Math.floor(Math.random()*18)+4;
+    const dx=(Math.random()-0.5)*36;
+    ctx.drawImage(source,0,sy,W,sh,dx,sy,W,sh);
+  }
+  return out;
+}
+
+// ---- Bratxon G Major 74 visual: réplica del filtro ffmpeg geq de doble lente ----
+// pass1: bulge amplio (R=0.5*S, signo -1)   pass2: pinch central (R=0.2*S, signo +1)
+// D(r) = 1 + sign*atan(atan(atan(atan(1-(r/R)^2))))   (idéntico al geq original, atan en radianes = mismo dominio que ffmpeg)
+function bratxonD(rNorm, sign){
+  const inner = 1 - rNorm*rNorm;
+  const t = Math.atan(Math.atan(Math.atan(Math.atan(inner))));
+  return 1 + sign*t;
+}
+function bratxonDistortSquare(source, S, R, sign, strengthFrac){
+  const out=getScratchCanvas(S,S);
+  const ctx=out.getContext('2d');
+  const srcData=source.getContext('2d').getImageData(0,0,S,S);
+  const dst=ctx.createImageData(S,S);
+  const cx=S/2, cy=S/2;
+  const sArr=srcData.data, dArr=dst.data;
+  for(let y=0;y<S;y++){for(let x=0;x<S;x++){
+    const dx=x-cx, dy=y-cy;
+    const r=Math.hypot(dx,dy);
+    let sx=x, sy=y;
+    if(r>0 && r<=R){
+      const D0=bratxonD(r/R, sign);
+      const D=1 + strengthFrac*(D0-1);
+      if(Math.abs(D)>0.0001){ sx=cx+dx/D; sy=cy+dy/D; }
+    }
+    sx=Math.max(0,Math.min(S-1,Math.round(sx)));
+    sy=Math.max(0,Math.min(S-1,Math.round(sy)));
+    const si=(sy*S+sx)*4, di=(y*S+x)*4;
+    dArr[di]=sArr[si];dArr[di+1]=sArr[si+1];dArr[di+2]=sArr[si+2];dArr[di+3]=sArr[si+3];
+  }}
+  ctx.putImageData(dst,0,0);
+  return out;
+}
+function applyBratxon(source, param){
+  const W=source.width, H=source.height;
+  const S=H; // ffmpeg: scale=$h:$h — encuadra en un cuadrado del lado de la altura
+  const strengthFrac = (param==null?100:param)/100;
+
+  const sq1=getScratchCanvas(S,S);
+  sq1.getContext('2d').clearRect(0,0,S,S);
+  sq1.getContext('2d').drawImage(source,0,0,S,S);
+  const d1=bratxonDistortSquare(sq1,S,S*0.5,-1,strengthFrac);
+
+  const back1=getScratchCanvas(W,H);
+  back1.getContext('2d').clearRect(0,0,W,H);
+  back1.getContext('2d').drawImage(d1,0,0,W,H);
+
+  const sq2=getScratchCanvas(S,S);
+  sq2.getContext('2d').clearRect(0,0,S,S);
+  sq2.getContext('2d').drawImage(back1,0,0,S,S);
+  const d2=bratxonDistortSquare(sq2,S,S*0.2,1,strengthFrac);
+
+  const out=getScratchCanvas(W,H);
+  out.getContext('2d').clearRect(0,0,W,H);
+  out.getContext('2d').drawImage(d2,0,0,W,H);
+
+  releaseScratchCanvas(sq1); releaseScratchCanvas(d1); releaseScratchCanvas(back1);
+  releaseScratchCanvas(sq2); releaseScratchCanvas(d2);
+  return out;
+}
+
+// ---- Wave horizontal / vertical: tamaño de onda ajustable (chico → grande) ----
+// un solo knob controla amplitud y largo de onda juntos: chico = ondas cortas y sutiles, grande = ondas amplias y marcadas
+function applyWaveH(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H); // base: tapa los huecos de borde que deja el desplazamiento
+  const amp = 2 + (param/100)*38;
+  const wavelength = 20 + (param/100)*180;
+  for(let y=0;y<H;y++){
+    const offset = amp*Math.sin((2*Math.PI*y)/wavelength);
+    ctx.drawImage(source, 0, y, W, 1, offset, y, W, 1);
+  }
+  return out;
+}
+function applyWaveV(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  const amp = 2 + (param/100)*38;
+  const wavelength = 20 + (param/100)*180;
+  for(let x=0;x<W;x++){
+    const offset = amp*Math.sin((2*Math.PI*x)/wavelength);
+    ctx.drawImage(source, x, 0, 1, H, x, offset, 1, H);
+  }
+  return out;
+}
+
+// ---- Flop / Flip / Right split: espejados ----
+function applyFlop(source, param){ // espejo horizontal (izquierda-derecha)
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H); // base, para poder atenuar con el slider
+  const alpha=(param==null?100:param)/100;
+  ctx.save();
+  ctx.globalAlpha=alpha;
+  ctx.translate(W,0);
+  ctx.scale(-1,1);
+  ctx.drawImage(source,0,0,W,H);
+  ctx.restore();
+  return out;
+}
+function applyFlip(source, param){ // espejo vertical (arriba-abajo)
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  const alpha=(param==null?100:param)/100;
+  ctx.save();
+  ctx.globalAlpha=alpha;
+  ctx.translate(0,H);
+  ctx.scale(1,-1);
+  ctx.drawImage(source,0,0,W,H);
+  ctx.restore();
+  return out;
+}
+function applyRightSplit(source, param){ // toma la parte derecha desde el punto de corte y la refleja hacia la izquierda
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const splitX=Math.max(1,Math.min(W-1,Math.round((param/100)*W)));
+  ctx.drawImage(source, splitX,0, W-splitX,H, splitX,0, W-splitX,H);
+  ctx.save();
+  ctx.translate(splitX,0);
+  ctx.scale(-1,1);
+  ctx.drawImage(source, splitX,0, W-splitX,H, 0,0, splitX,H);
+  ctx.restore();
+  return out;
+}
+
+// ---- Vignette / Noise / Pixelate / Zoom / Rotar / Solarize / Posterize ----
+function applyVignette(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  const strength=(param==null?60:param)/100;
+  const grad=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.25, W/2,H/2, Math.max(W,H)*0.75);
+  grad.addColorStop(0,'rgba(0,0,0,0)');
+  grad.addColorStop(1,`rgba(0,0,0,${strength})`);
+  ctx.fillStyle=grad;
+  ctx.fillRect(0,0,W,H);
+  return out;
+}
+function applyNoise(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  const amount=(param==null?30:param)/100;
+  const id=ctx.getImageData(0,0,W,H);
+  const d=id.data;
+  for(let i=0;i<d.length;i+=4){
+    const n=(Math.random()-0.5)*255*amount;
+    d[i]=Math.max(0,Math.min(255,d[i]+n));
+    d[i+1]=Math.max(0,Math.min(255,d[i+1]+n));
+    d[i+2]=Math.max(0,Math.min(255,d[i+2]+n));
+  }
+  ctx.putImageData(id,0,0);
+  return out;
+}
+function applyPixelate(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const blockSize=1+Math.round((param/100)*30);
+  const smallW=Math.max(1,Math.round(W/blockSize)), smallH=Math.max(1,Math.round(H/blockSize));
+  const tmp=getScratchCanvas(smallW,smallH);
+  const tctx=tmp.getContext('2d');
+  tctx.clearRect(0,0,smallW,smallH);
+  tctx.drawImage(source,0,0,smallW,smallH);
+  ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(tmp,0,0,smallW,smallH,0,0,W,H);
+  ctx.imageSmoothingEnabled=true;
+  releaseScratchCanvas(tmp);
+  return out;
+}
+function applyZoom(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const scale=1+(param/100);
+  const sw=W/scale, sh=H/scale;
+  const sx=(W-sw)/2, sy=(H-sh)/2;
+  ctx.drawImage(source, sx,sy,sw,sh, 0,0,W,H);
+  return out;
+}
+function applyRotate(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H); // base: tapa las esquinas que deja la rotación
+  ctx.save();
+  ctx.translate(W/2,H/2);
+  ctx.rotate(param*Math.PI/180);
+  ctx.drawImage(source,-W/2,-H/2,W,H);
+  ctx.restore();
+  return out;
+}
+function applySolarize(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  const threshold=(param==null?50:param)/100*255;
+  const id=ctx.getImageData(0,0,W,H);
+  const d=id.data;
+  for(let i=0;i<d.length;i+=4){
+    if(d[i]>threshold) d[i]=255-d[i];
+    if(d[i+1]>threshold) d[i+1]=255-d[i+1];
+    if(d[i+2]>threshold) d[i+2]=255-d[i+2];
+  }
+  ctx.putImageData(id,0,0);
+  return out;
+}
+function applyPosterize(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  const levels=Math.max(2, Math.round(16 - (param/100)*13));
+  const step=255/(levels-1);
+  const id=ctx.getImageData(0,0,W,H);
+  const d=id.data;
+  for(let i=0;i<d.length;i+=4){
+    d[i]=Math.round(Math.round(d[i]/step)*step);
+    d[i+1]=Math.round(Math.round(d[i+1]/step)*step);
+    d[i+2]=Math.round(Math.round(d[i+2]/step)*step);
+  }
+  ctx.putImageData(id,0,0);
+  return out;
+}
+
+// ---- Adjust: Levels / Curves / Color Balance / Tinte / White Balance / Vibrance / Threshold ----
+function applyLevels(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  const amount=(param==null?30:param)/100;
+  const black=Math.round(amount*40), white=255-Math.round(amount*40);
+  const range=Math.max(1,white-black);
+  const id=ctx.getImageData(0,0,W,H);
+  const d=id.data;
+  for(let i=0;i<d.length;i+=4){
+    d[i]=Math.max(0,Math.min(255,(d[i]-black)*255/range));
+    d[i+1]=Math.max(0,Math.min(255,(d[i+1]-black)*255/range));
+    d[i+2]=Math.max(0,Math.min(255,(d[i+2]-black)*255/range));
+  }
+  ctx.putImageData(id,0,0);
+  return out;
+}
+function applyCurves(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  const s=(param==null?40:param)/100; // fuerza de la S-curve
+  const id=ctx.getImageData(0,0,W,H);
+  const d=id.data;
+  const curve=(v)=>{
+    const x=v/255;
+    const y=x + s*0.5*Math.sin(2*Math.PI*(x-0.5))*-1; // realza sombras/luces, aplana medios
+    return Math.max(0,Math.min(255, y*255));
+  };
+  for(let i=0;i<d.length;i+=4){
+    d[i]=curve(d[i]); d[i+1]=curve(d[i+1]); d[i+2]=curve(d[i+2]);
+  }
+  ctx.putImageData(id,0,0);
+  return out;
+}
+function applyColorBalance(source, param){ // cálido(+)/frío(-)
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  const amt=(param==null?0:param)/100*40;
+  const id=ctx.getImageData(0,0,W,H);
+  const d=id.data;
+  for(let i=0;i<d.length;i+=4){
+    d[i]=Math.max(0,Math.min(255,d[i]+amt));
+    d[i+2]=Math.max(0,Math.min(255,d[i+2]-amt));
+  }
+  ctx.putImageData(id,0,0);
+  return out;
+}
+function applyTint(source, param){ // verde(-)/magenta(+)
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  const amt=(param==null?0:param)/100*40;
+  const id=ctx.getImageData(0,0,W,H);
+  const d=id.data;
+  for(let i=0;i<d.length;i+=4){
+    d[i]=Math.max(0,Math.min(255,d[i]+amt*0.5));
+    d[i+1]=Math.max(0,Math.min(255,d[i+1]-amt));
+    d[i+2]=Math.max(0,Math.min(255,d[i+2]+amt*0.5));
+  }
+  ctx.putImageData(id,0,0);
+  return out;
+}
+function applyWhiteBalance(source, param){ // -100 fría .. +100 cálida, actúa fuerte sobre las luces
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  const amt=(param==null?0:param)/100;
+  const id=ctx.getImageData(0,0,W,H);
+  const d=id.data;
+  for(let i=0;i<d.length;i+=4){
+    const lum=(d[i]+d[i+1]+d[i+2])/765; // 0..1, más luces = más efecto
+    const w=amt*40*lum;
+    d[i]=Math.max(0,Math.min(255,d[i]+w));
+    d[i+2]=Math.max(0,Math.min(255,d[i+2]-w));
+  }
+  ctx.putImageData(id,0,0);
+  return out;
+}
+function applyVibrance(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  const amt=(param==null?80:param)/100;
+  const id=ctx.getImageData(0,0,W,H);
+  const d=id.data;
+  for(let i=0;i<d.length;i+=4){
+    const r=d[i],g=d[i+1],b=d[i+2];
+    const max=Math.max(r,g,b), avg=(r+g+b)/3;
+    const sat=(max-avg)/128; // 0..~1, ya saturado = menos boost
+    const boost=amt*(1-sat);
+    d[i]=Math.max(0,Math.min(255,r+(r-avg)*boost));
+    d[i+1]=Math.max(0,Math.min(255,g+(g-avg)*boost));
+    d[i+2]=Math.max(0,Math.min(255,b+(b-avg)*boost));
+  }
+  ctx.putImageData(id,0,0);
+  return out;
+}
+function applyThreshold(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  const t=(param==null?50:param)/100*255;
+  const id=ctx.getImageData(0,0,W,H);
+  const d=id.data;
+  for(let i=0;i<d.length;i+=4){
+    const lum=d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114;
+    const v=lum>t?255:0;
+    d[i]=v; d[i+1]=v; d[i+2]=v;
+  }
+  ctx.putImageData(id,0,0);
+  return out;
+}
+
+// ---- Sharpen / Emboss / Glow / Radial Blur / Lens Flare ----
+function applySharpen(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const amt=(param==null?50:param)/100;
+  const srcData=source.getContext('2d').getImageData(0,0,W,H);
+  const s=srcData.data;
+  const dst=ctx.createImageData(W,H);
+  const d=dst.data;
+  const k=amt*1.5;
+  for(let y=0;y<H;y++){for(let x=0;x<W;x++){
+    const i=(y*W+x)*4;
+    if(x===0||y===0||x===W-1||y===H-1){ d[i]=s[i];d[i+1]=s[i+1];d[i+2]=s[i+2];d[i+3]=s[i+3]; continue; }
+    for(let c=0;c<3;c++){
+      const center=s[i+c];
+      const up=s[i-W*4+c], down=s[i+W*4+c], left=s[i-4+c], right=s[i+4+c];
+      const v = center + k*(4*center - up - down - left - right);
+      d[i+c]=Math.max(0,Math.min(255,v));
+    }
+    d[i+3]=s[i+3];
+  }}
+  ctx.putImageData(dst,0,0);
+  return out;
+}
+function applyEmboss(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const amt=(param==null?60:param)/100;
+  const srcData=source.getContext('2d').getImageData(0,0,W,H);
+  const s=srcData.data;
+  const dst=ctx.createImageData(W,H);
+  const d=dst.data;
+  for(let y=0;y<H;y++){for(let x=0;x<W;x++){
+    const i=(y*W+x)*4;
+    if(x===0||y===0){ d[i]=128;d[i+1]=128;d[i+2]=128;d[i+3]=s[i+3]; continue; }
+    const j=((y-1)*W+(x-1))*4;
+    for(let c=0;c<3;c++){
+      const emb = 128 + (s[i+c]-s[j+c]);
+      d[i+c] = s[i+c]*(1-amt) + emb*amt;
+    }
+    d[i+3]=s[i+3];
+  }}
+  ctx.putImageData(dst,0,0);
+  return out;
+}
+function applyGlow(source, param){
+  const W=source.width,H=source.height;
+  const amt=(param==null?50:param)/100;
+  const blurred=getScratchCanvas(W,H);
+  const bctx=blurred.getContext('2d');
+  bctx.clearRect(0,0,W,H);
+  bctx.filter=`blur(${4+amt*10}px) brightness(1.3)`;
+  bctx.drawImage(source,0,0,W,H);
+  bctx.filter='none';
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  ctx.globalAlpha=amt;
+  ctx.globalCompositeOperation='screen';
+  ctx.drawImage(blurred,0,0,W,H);
+  ctx.globalCompositeOperation='source-over';
+  ctx.globalAlpha=1;
+  releaseScratchCanvas(blurred);
+  return out;
+}
+function applyRadialBlur(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const amt=(param==null?30:param)/100;
+  const steps=6;
+  ctx.globalAlpha=1/steps;
+  for(let i=0;i<steps;i++){
+    const scale=1 + amt*0.05*(i/(steps-1));
+    const sw=W/scale, sh=H/scale;
+    const sx=(W-sw)/2, sy=(H-sh)/2;
+    ctx.drawImage(source, sx,sy,sw,sh, 0,0,W,H);
+  }
+  ctx.globalAlpha=1;
+  return out;
+}
+function applyLensFlare(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  const amt=(param==null?60:param)/100;
+  const cx=W*0.78, cy=H*0.22;
+  const grad=ctx.createRadialGradient(cx,cy,0, cx,cy, Math.max(W,H)*0.35);
+  grad.addColorStop(0, `rgba(255,255,240,${0.9*amt})`);
+  grad.addColorStop(0.25, `rgba(255,220,150,${0.35*amt})`);
+  grad.addColorStop(1, 'rgba(255,220,150,0)');
+  ctx.globalCompositeOperation='screen';
+  ctx.fillStyle=grad;
+  ctx.fillRect(0,0,W,H);
+  const spots=[[0.6,0.09,0.03],[0.45,0.03,0.02],[0.3,-0.05,0.015]];
+  for(const [t,dx,r] of spots){
+    const sx=cx+(W*0.5-cx)*2*dx, sy=cy+(H*0.5-cy)*2*dx;
+    const g2=ctx.createRadialGradient(sx,sy,0,sx,sy,Math.max(W,H)*r);
+    g2.addColorStop(0, `rgba(255,240,200,${0.5*amt})`);
+    g2.addColorStop(1, 'rgba(255,240,200,0)');
+    ctx.fillStyle=g2;
+    ctx.fillRect(0,0,W,H);
+  }
+  ctx.globalCompositeOperation='source-over';
+  return out;
+}
+
+// ---- Color Lab (L*a*b) ----
+function rgb2lab(r,g,b){
+  let [rl,gl,bl]=[r/255,g/255,b/255].map(v=> v>0.04045 ? Math.pow((v+0.055)/1.055,2.4) : v/12.92);
+  let x=(rl*0.4124+gl*0.3576+bl*0.1805)/0.95047;
+  let y=(rl*0.2126+gl*0.7152+bl*0.0722)/1.0;
+  let z=(rl*0.0193+gl*0.1192+bl*0.9505)/1.08883;
+  [x,y,z]=[x,y,z].map(v=> v>0.008856 ? Math.cbrt(v) : (7.787*v)+16/116);
+  return [(116*y)-16, 500*(x-y), 200*(y-z)];
+}
+function lab2rgb(L,a,b){
+  let y=(L+16)/116, x=a/500+y, z=y-b/200;
+  [x,y,z]=[x,y,z].map(v=> v*v*v>0.008856 ? v*v*v : (v-16/116)/7.787);
+  x*=0.95047; z*=1.08883;
+  let rl=x*3.2406+y*-1.5372+z*-0.4986;
+  let gl=x*-0.9689+y*1.8758+z*0.0415;
+  let bl=x*0.0557+y*-0.2040+z*1.0570;
+  [rl,gl,bl]=[rl,gl,bl].map(v=> v>0.0031308 ? 1.055*Math.pow(v,1/2.4)-0.055 : 12.92*v);
+  return [rl,gl,bl].map(v=> Math.max(0,Math.min(255, v*255)));
+}
+function applyLabContrast(source, param){
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  const strength=1+((param==null?40:param)/100);
+  const id=ctx.getImageData(0,0,W,H);
+  const d=id.data;
+  for(let i=0;i<d.length;i+=4){
+    const [L,a,b]=rgb2lab(d[i],d[i+1],d[i+2]);
+    const L2=Math.max(0,Math.min(100, 50+(L-50)*strength));
+    const [r,g,bl]=lab2rgb(L2,a,b);
+    d[i]=r; d[i+1]=g; d[i+2]=bl;
+  }
+  ctx.putImageData(id,0,0);
+  return out;
+}
+function applyLabGrade(source, param){ // sombras a teal, luces a naranja, en espacio Lab
+  const W=source.width,H=source.height;
+  const out=getScratchCanvas(W,H);
+  const ctx=out.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(source,0,0,W,H);
+  const amt=(param==null?50:param)/100;
+  const id=ctx.getImageData(0,0,W,H);
+  const d=id.data;
+  for(let i=0;i<d.length;i+=4){
+    const [L,a,b]=rgb2lab(d[i],d[i+1],d[i+2]);
+    const shadow=1-L/100; // más sombra cuanto más oscuro
+    const light=L/100;
+    const a2=a + amt*10*(light - shadow*0.5);
+    const b2=b - amt*14*shadow + amt*10*light;
+    const [r,g,bl]=lab2rgb(L,a2,b2);
+    d[i]=r; d[i+1]=g; d[i+2]=bl;
+  }
+  ctx.putImageData(id,0,0);
+  return out;
+}
+
+function applyEffect(source, eff){
+  if(eff.kind==='filter') return applyFilterEffect(source, eff);
+  if(eff.kind==='fisheye') return applyFisheye(source, eff.param);
+  if(eff.kind==='chroma') return applyChroma(source, eff.param);
+  if(eff.kind==='glitch') return applyGlitch(source, eff.param);
+  if(eff.kind==='bratxon') return applyBratxon(source, eff.param);
+  if(eff.kind==='wavex') return applyWaveH(source, eff.param);
+  if(eff.kind==='wavey') return applyWaveV(source, eff.param);
+  if(eff.kind==='flop') return applyFlop(source, eff.param);
+  if(eff.kind==='flip') return applyFlip(source, eff.param);
+  if(eff.kind==='rightsplit') return applyRightSplit(source, eff.param);
+  if(eff.kind==='vignette') return applyVignette(source, eff.param);
+  if(eff.kind==='noise') return applyNoise(source, eff.param);
+  if(eff.kind==='pixelate') return applyPixelate(source, eff.param);
+  if(eff.kind==='zoom') return applyZoom(source, eff.param);
+  if(eff.kind==='rotate') return applyRotate(source, eff.param);
+  if(eff.kind==='solarize') return applySolarize(source, eff.param);
+  if(eff.kind==='posterize') return applyPosterize(source, eff.param);
+  if(eff.kind==='levels') return applyLevels(source, eff.param);
+  if(eff.kind==='curves') return applyCurves(source, eff.param);
+  if(eff.kind==='colorbalance') return applyColorBalance(source, eff.param);
+  if(eff.kind==='tint') return applyTint(source, eff.param);
+  if(eff.kind==='whitebalance') return applyWhiteBalance(source, eff.param);
+  if(eff.kind==='vibrance') return applyVibrance(source, eff.param);
+  if(eff.kind==='threshold') return applyThreshold(source, eff.param);
+  if(eff.kind==='sharpen') return applySharpen(source, eff.param);
+  if(eff.kind==='emboss') return applyEmboss(source, eff.param);
+  if(eff.kind==='glow') return applyGlow(source, eff.param);
+  if(eff.kind==='radialblur') return applyRadialBlur(source, eff.param);
+  if(eff.kind==='lensflare') return applyLensFlare(source, eff.param);
+  if(eff.kind==='labcontrast') return applyLabContrast(source, eff.param);
+  if(eff.kind==='labgrade') return applyLabGrade(source, eff.param);
+  return source;
+}
+
+
+// ---- volume slider ----
+const volumeSlider = document.getElementById('volumeSlider');
+const volumeVal = document.getElementById('volumeVal');
+volumeSlider.oninput = ()=>{ volumeVal.textContent = volumeSlider.value+'%'; };
+
+// ---- LUT upload ----
+let lutData = null;
+const lutInput = document.getElementById('lutInput');
+const lutLabel = document.getElementById('lutLabel');
+const lutClear = document.getElementById('lutClear');
+
+lutInput.onchange = async (e)=>{
+  const f = e.target.files[0]; if(!f) return;
+  const text = await f.text();
+  const parsed = parseCube(text);
+  if(parsed){ lutData=parsed; lutLabel.textContent='✓ '+f.name; lutClear.style.display='inline'; }
+  else { lutLabel.textContent='❌ error al leer el .cube'; }
+};
+lutClear.onclick = ()=>{ lutData=null; lutLabel.textContent='+ subir .cube'; lutClear.style.display='none'; lutInput.value=''; };
+
+function parseCube(text){
+  const lines = text.split('\n').map(l=>l.trim()).filter(l=>l && !l.startsWith('#') && !l.startsWith('TITLE'));
+  let size=0; const values=[];
+  for(const line of lines){
+    if(line.startsWith('LUT_3D_SIZE')){ size=parseInt(line.split(/\s+/)[1]); continue; }
+    if(line.startsWith('DOMAIN')||line.startsWith('LUT_1D')||line.startsWith('LUT_3D_SIZE')) continue;
+    const parts=line.split(/\s+/).map(Number);
+    if(parts.length===3 && !isNaN(parts[0])){ values.push(...parts); }
+  }
+  if(!size||values.length!==size*size*size*3) return null;
+  return {size, table: new Float32Array(values)};
+}
+
+function applyLUT(source, lut){
+  if(!lut) return source;
+  const W=source.width, H=source.height;
+  const srcCtx = source.getContext ? source.getContext('2d') : null;
+  if(!srcCtx) return source;
+  const srcData = srcCtx.getImageData(0,0,W,H);
+  const out = getScratchCanvas(W,H);
+  const outCtx = out.getContext('2d');
+  const dst = outCtx.createImageData(W,H);
+  const {size,table} = lut;
+  const s=srcData.data, d=dst.data, s1=size-1;
+  for(let i=0;i<W*H;i++){
+    const ri=s[i*4]/255*s1, gi=s[i*4+1]/255*s1, bi=s[i*4+2]/255*s1;
+    const r0=Math.floor(ri),g0=Math.floor(gi),b0=Math.floor(bi);
+    const r1=Math.min(r0+1,s1),g1=Math.min(g0+1,s1),b1=Math.min(b0+1,s1);
+    const rf=ri-r0,gf=gi-g0,bf=bi-b0;
+    const ix=(r,g,b)=>(b*size*size+g*size+r)*3;
+    const lp=(a,b,t)=>a+(b-a)*t;
+    const tr=(ch)=>lp(lp(lp(table[ix(r0,g0,b0)+ch],table[ix(r1,g0,b0)+ch],rf),lp(table[ix(r0,g1,b0)+ch],table[ix(r1,g1,b0)+ch],rf),gf),lp(lp(table[ix(r0,g0,b1)+ch],table[ix(r1,g0,b1)+ch],rf),lp(table[ix(r0,g1,b1)+ch],table[ix(r1,g1,b1)+ch],rf),gf),bf);
+    d[i*4]=Math.round(tr(0)*255); d[i*4+1]=Math.round(tr(1)*255); d[i*4+2]=Math.round(tr(2)*255); d[i*4+3]=s[i*4+3];
+  }
+  outCtx.putImageData(dst,0,0);
+  return out;
+}
+
+// ---- pitch shifting (granular overlap-add) ----
+function hann(n){
+  const w=new Float32Array(n);
+  for(let i=0;i<n;i++) w[i]=0.5-0.5*Math.cos(2*Math.PI*i/(n-1));
+  return w;
+}
+
+function pitchShiftChannel(input, semitones){
+  const ratio=Math.pow(2, semitones/12);
+  const length=input.length;
+  const output=new Float32Array(length);
+  const grainSize=4096;
+  const hop=Math.floor(grainSize/4);
+  const win=hann(grainSize);
+  for(let i=0; i+grainSize<length; i+=hop){
+    for(let j=0;j<grainSize;j++){
+      const srcPos=i+j*ratio;
+      const idx=Math.floor(srcPos);
+      const frac=srcPos-idx;
+      const s0=input[idx]||0, s1=input[idx+1]||0;
+      const val=(s0+(s1-s0)*frac)*win[j];
+      if(i+j<length) output[i+j]+=val;
+    }
+  }
+  return output;
+}
+
+function pitchShiftBuffer(audioBuffer, semitones, audioCtx){
+  const numCh=audioBuffer.numberOfChannels;
+  const out=audioCtx.createBuffer(numCh, audioBuffer.length, audioBuffer.sampleRate);
+  for(let ch=0; ch<numCh; ch++){
+    const shifted=pitchShiftChannel(audioBuffer.getChannelData(ch), semitones);
+    out.getChannelData(ch).set(shifted);
+  }
+  return out;
+}
+
+function mixVoices(audioBuffer, chain, audioCtx){
+  if(chain.length===0) return audioBuffer;
+  const shiftedBufs = chain.map(p=>pitchShiftBuffer(audioBuffer, p.semitones, audioCtx));
+  const numCh=audioBuffer.numberOfChannels;
+  const out=audioCtx.createBuffer(numCh, audioBuffer.length, audioBuffer.sampleRate);
+  for(let ch=0; ch<numCh; ch++){
+    const outData=out.getChannelData(ch);
+    for(let i=0;i<audioBuffer.length;i++){
+      let sum=0;
+      for(const b of shiftedBufs) sum+=b.getChannelData(ch)[i];
+      outData[i]=sum/shiftedBufs.length;
+    }
+  }
+  return out;
+}
+
+function concatenateAudioBuffers(buffers, audioCtx){
+  const numCh = buffers[0].numberOfChannels;
+  const totalLength = buffers.reduce((s,b)=>s+b.length,0);
+  const sampleRate = buffers[0].sampleRate;
+  const out = audioCtx.createBuffer(numCh, totalLength, sampleRate);
+  for(let ch=0; ch<numCh; ch++){
+    const outData = out.getChannelData(ch);
+    let offset=0;
+    for(const b of buffers){
+      outData.set(b.getChannelData(ch), offset);
+      offset += b.length;
+    }
+  }
+  return out;
+}
+
+// ---- main pipeline ----
+const workCanvas = document.getElementById('workCanvas');
+const resultBox = document.getElementById('resultBox');
+const engineTag = document.getElementById('engineTag');
+
+const FAST_ENGINE_AVAILABLE = (typeof VideoEncoder!=='undefined') && (typeof AudioEncoder!=='undefined') && (typeof window.WebMMuxer!=='undefined');
+if(FAST_ENGINE_AVAILABLE){
+  engineTag.textContent = 'MOTOR RÁPIDO (WEBCODECS) — PROCESA SIN TIEMPO REAL';
+  engineTag.classList.add('engine-fast');
+} else {
+  engineTag.textContent = 'MOTOR COMPATIBLE (TIEMPO REAL) — CHROME/EDGE ES MÁS RÁPIDO';
+}
+
+processBtn.onclick = async ()=>{
+  if(FAST_ENGINE_AVAILABLE){
+    try{ await processFast(); return; }
+    catch(err){
+      console.error('motor rápido falló, usando el compatible:', err);
+      statusText.textContent = 'motor rápido falló, reintentando con el compatible...';
+    }
+  }
+  await processFallback();
+};
+
+// ---- FAST pipeline: WebCodecs + webm-muxer, decoupled from real-time playback ----
+async function seekTo(video, t){
+  return new Promise(res=>{
+    const onSeeked = ()=>{ video.removeEventListener('seeked', onSeeked); res(); };
+    video.addEventListener('seeked', onSeeked);
+    video.currentTime = t;
+  });
+}
+
+async function processFast(){
+  processBtn.disabled=true;
+  resultBox.innerHTML='';
+  progressFill.style.width='2%';
+  statusText.className='status active';
+  statusText.textContent='decodificando audio...';
+
+  const levels = Math.max(1, Math.min(10, parseInt(levelsInput.value)||1));
+  const concatMode = powersMode==='concat' && levels>1;
+  const FPS = 30;
+
+  const arrayBuffer = await videoFile.arrayBuffer();
+  const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  const decoded = await audioCtx.decodeAudioData(arrayBuffer.slice(0));
+
+  statusText.textContent='calculando niveles de pitch...';
+  progressFill.style.width='8%';
+  const levelAudios = [];
+  let prevAudio = decoded;
+  for(let k=0;k<levels;k++){
+    const lvl = pitchChain.length ? mixVoices(prevAudio, pitchChain, audioCtx) : decoded;
+    levelAudios.push(lvl);
+    prevAudio = lvl;
+  }
+  // apply volume compounded per level (vol^k per level k, same logic as effects)
+  const vol = parseInt(volumeSlider.value)/100;
+  if(vol !== 1){
+    for(let k=0;k<levelAudios.length;k++){
+      const gain = Math.pow(vol, k+1);
+      const buf = levelAudios[k];
+      for(let ch=0;ch<buf.numberOfChannels;ch++){
+        const d=buf.getChannelData(ch);
+        for(let i=0;i<d.length;i++) d[i]*=gain;
+      }
+    }
+  }
+  let finalAudioBuffer = concatMode ? concatenateAudioBuffers(levelAudios, audioCtx) : levelAudios[levels-1];
+  finalAudioBuffer = applyAudioFX(finalAudioBuffer, audioCtx);
+
+  progressFill.style.width='14%';
+
+  const video = document.createElement('video');
+  video.src = URL.createObjectURL(videoFile);
+  video.muted = true;
+  video.playsInline = true;
+  await new Promise(res=>{ video.onloadedmetadata=res; });
+
+  const rawW = video.videoWidth, rawH = video.videoHeight;
+  const maxW = 480;
+  const scale = rawW > maxW ? maxW/rawW : 1;
+  const W = Math.round(rawW*scale), H = Math.round(rawH*scale);
+  const stage = document.createElement('canvas'); stage.width=W; stage.height=H;
+  const sctx = stage.getContext('2d');
+  workCanvas.width=W; workCanvas.height=H;
+  const octx = workCanvas.getContext('2d');
+
+  // decode every source frame exactly once and cache as ImageBitmaps — reused across all power levels
+  const baseFrameCount = Math.max(1, Math.round(video.duration * FPS));
+  const baseFrames = [];
+  for(let i=0;i<baseFrameCount;i++){
+    await seekTo(video, Math.min(i/FPS, video.duration - 1e-3));
+    sctx.clearRect(0,0,W,H);
+    sctx.drawImage(video,0,0,W,H);
+    baseFrames.push(await createImageBitmap(stage));
+    progressFill.style.width = (14 + (i/baseFrameCount)*26) + '%';
+  }
+
+  statusText.textContent='configurando codificadores...';
+  progressFill.style.width='42%';
+
+  const videoCandidates = [
+    {codec:'vp09.00.10.08', muxCodec:'V_VP9'},
+    {codec:'vp8', muxCodec:'V_VP8'}
+  ];
+  let videoPick=null;
+  for(const c of videoCandidates){
+    const support = await VideoEncoder.isConfigSupported({codec:c.codec, width:W, height:H, bitrate:4_000_000, framerate:FPS});
+    if(support.supported){ videoPick=c; break; }
+  }
+  if(!videoPick) throw new Error('ningún codec de video soportado por WebCodecs');
+
+  const muxer = new WebMMuxer.Muxer({
+    target: new WebMMuxer.ArrayBufferTarget(),
+    video: { codec: videoPick.muxCodec, width: W, height: H, frameRate: FPS },
+    audio: { codec: 'A_OPUS', numberOfChannels: finalAudioBuffer.numberOfChannels, sampleRate: finalAudioBuffer.sampleRate }
+  });
+
+  const videoEncoder = new VideoEncoder({
+    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+    error: e => console.error('video encoder error', e)
+  });
+  videoEncoder.configure({ codec: videoPick.codec, width: W, height: H, bitrate: 4_000_000, framerate: FPS });
+
+  const audioEncoder = new AudioEncoder({
+    output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+    error: e => console.error('audio encoder error', e)
+  });
+  audioEncoder.configure({ codec: 'opus', sampleRate: finalAudioBuffer.sampleRate, numberOfChannels: finalAudioBuffer.numberOfChannels, bitrate: 128000 });
+
+  // ---- encode audio directly from the buffer (no real-time playback needed) ----
+  statusText.textContent='codificando audio...';
+  const CHUNK_FRAMES = 4800;
+  const chData = [];
+  for(let ch=0; ch<finalAudioBuffer.numberOfChannels; ch++) chData.push(finalAudioBuffer.getChannelData(ch));
+  const totalSamples = finalAudioBuffer.length;
+  for(let offset=0; offset<totalSamples; offset+=CHUNK_FRAMES){
+    const n = Math.min(CHUNK_FRAMES, totalSamples-offset);
+    const planar = new Float32Array(n * chData.length);
+    for(let ch=0; ch<chData.length; ch++) planar.set(chData[ch].subarray(offset, offset+n), ch*n);
+    const audioData = new AudioData({
+      format:'f32-planar',
+      sampleRate: finalAudioBuffer.sampleRate,
+      numberOfFrames: n,
+      numberOfChannels: chData.length,
+      timestamp: Math.round(offset/finalAudioBuffer.sampleRate*1e6),
+      data: planar
+    });
+    audioEncoder.encode(audioData);
+    audioData.close();
+  }
+  await audioEncoder.flush();
+
+  // ---- encode video: apply the effect chain to the cached frames, level by level ----
+  statusText.textContent='codificando video...';
+  const frameDurUs = Math.round(1e6/FPS);
+  let overallFrame = 0;
+  const totalOutFrames = concatMode ? baseFrameCount*levels : baseFrameCount;
+
+  async function encodeLevel(repeatCount){
+    for(let i=0;i<baseFrameCount;i++){
+      let cur = document.createElement('canvas'); cur.width=W; cur.height=H;
+      cur.getContext('2d').drawImage(baseFrames[i],0,0,W,H);
+      const usedThisFrame=[];
+      for(let r=0;r<repeatCount;r++){
+        for(const eff of effectChain){
+          cur = applyEffect(cur, eff);
+          usedThisFrame.push(cur);
+        }
+        // LUT se multiplica también — una vez por repetición
+        if(lutData){ const l=applyLUT(cur,lutData); usedThisFrame.push(l); cur=l; }
+      }
+      octx.clearRect(0,0,W,H);
+      octx.drawImage(cur,0,0,W,H);
+      usedThisFrame.forEach(releaseScratchCanvas);
+
+      const frame = new VideoFrame(workCanvas, { timestamp: overallFrame*frameDurUs, duration: frameDurUs });
+      videoEncoder.encode(frame, { keyFrame: overallFrame%60===0 });
+      frame.close();
+      overallFrame++;
+      progressFill.style.width = (42 + (overallFrame/totalOutFrames)*54) + '%';
+      if(overallFrame % 8 === 0) await new Promise(r=>setTimeout(r)); // yield to keep UI responsive
+    }
+  }
+
+  if(concatMode){
+    for(let k=1;k<=levels;k++){
+      statusText.textContent = `codificando nivel ${k}/${levels}...`;
+      await encodeLevel(k);
+    }
+  } else {
+    await encodeLevel(levels);
+  }
+
+  await videoEncoder.flush();
+  baseFrames.forEach(bmp=>bmp.close());
+  muxer.finalize();
+
+  progressFill.style.width='100%';
+  statusText.className='status done';
+  statusText.textContent='¡listo! descargá tu video (motor rápido)';
+
+  const { buffer } = muxer.target;
+  const blob = new Blob([buffer], {type:'video/webm'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url;
+  a.download='ihtx_output.webm';
+  a.className='download-btn';
+  a.textContent='⬇ DESCARGAR .WEBM';
+  resultBox.appendChild(a);
+  bumpExports();
+
+  processBtn.disabled=false;
+}
+
+async function processFallback(){
+  processBtn.disabled=true;
+  resultBox.innerHTML='';
+  progressFill.style.width='3%';
+  statusText.className='status active';
+  statusText.textContent='decodificando audio...';
+
+  try{
+    const levels = Math.max(1, Math.min(10, parseInt(levelsInput.value)||1));
+    const concatMode = powersMode==='concat' && levels>1;
+
+    const arrayBuffer = await videoFile.arrayBuffer();
+    const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const decoded = await audioCtx.decodeAudioData(arrayBuffer.slice(0));
+
+    statusText.textContent='calculando niveles de pitch...';
+    progressFill.style.width='12%';
+
+    // level audio buffers: level k = pitch chain reapplied k times in sequence
+    const levelAudios = [];
+    let prevAudio = decoded;
+    for(let k=0;k<levels;k++){
+      const lvl = pitchChain.length ? mixVoices(prevAudio, pitchChain, audioCtx) : decoded;
+      levelAudios.push(lvl);
+      prevAudio = lvl;
+    }
+
+    // volumen se multiplica por nivel: vol^k
+    const vol = parseInt(volumeSlider.value)/100;
+    if(vol !== 1){
+      for(let k=0;k<levelAudios.length;k++){
+        const gain = Math.pow(vol, k+1);
+        const buf = levelAudios[k];
+        for(let ch=0;ch<buf.numberOfChannels;ch++){
+          const d=buf.getChannelData(ch);
+          for(let i=0;i<d.length;i++) d[i]*=gain;
+        }
+      }
+    }
+
+    let finalAudioBuffer = concatMode ? concatenateAudioBuffers(levelAudios, audioCtx) : levelAudios[levels-1];
+    finalAudioBuffer = applyAudioFX(finalAudioBuffer, audioCtx);
+
+    statusText.textContent='preparando video...';
+    progressFill.style.width='22%';
+
+    const video = document.createElement('video');
+    video.src = URL.createObjectURL(videoFile);
+    video.muted = true;
+    video.playsInline = true;
+    await new Promise(res=>{ video.onloadedmetadata=res; });
+
+    const rawW = video.videoWidth, rawH = video.videoHeight;
+    const maxW = 480;
+    const scale = rawW > maxW ? maxW/rawW : 1;
+    const W = Math.round(rawW*scale), H = Math.round(rawH*scale);
+    const stage = document.createElement('canvas'); stage.width=W; stage.height=H;
+    const sctx = stage.getContext('2d');
+    workCanvas.width=W; workCanvas.height=H;
+    const octx = workCanvas.getContext('2d');
+
+    const videoStream = workCanvas.captureStream(30);
+    const destNode = audioCtx.createMediaStreamDestination();
+    const srcNode = audioCtx.createBufferSource();
+    srcNode.buffer = finalAudioBuffer;
+    srcNode.connect(destNode);
+
+    const combined = new MediaStream([...videoStream.getVideoTracks(), ...destNode.stream.getAudioTracks()]);
+
+    let mimeType = 'video/webm;codecs=vp9,opus';
+    if(!MediaRecorder.isTypeSupported(mimeType)) mimeType='video/webm';
+    const recorder = new MediaRecorder(combined, {mimeType});
+    const chunks=[];
+    recorder.ondataavailable = e=>{ if(e.data.size) chunks.push(e.data); };
+    const stopped = new Promise(res=>recorder.onstop=res);
+
+    function playOneLevel(repeatCount, levelIdx, totalLevels){
+      return new Promise(async (resolve)=>{
+        video.currentTime = 0;
+        let raf;
+        function renderFrame(){
+          sctx.clearRect(0,0,W,H);
+          sctx.filter='none';
+          sctx.drawImage(video,0,0,W,H);
+          let cur = stage;
+          const usedThisFrame=[];
+          for(let r=0;r<repeatCount;r++){
+            for(const eff of effectChain){
+              cur = applyEffect(cur, eff);
+              usedThisFrame.push(cur);
+            }
+            // LUT se multiplica — una vez por repetición
+            if(lutData){ const l=applyLUT(cur,lutData); usedThisFrame.push(l); cur=l; }
+          }
+          octx.clearRect(0,0,W,H);
+          octx.drawImage(cur,0,0,W,H);
+          usedThisFrame.forEach(releaseScratchCanvas);
+          if(!video.paused && !video.ended){
+            raf = requestAnimationFrame(renderFrame);
+            const levelBase = 30 + (levelIdx/totalLevels)*65;
+            const levelSpan = (1/totalLevels)*65;
+            const pct = levelBase + (video.duration ? (video.currentTime/video.duration)*levelSpan : 0);
+            progressFill.style.width = Math.min(96,pct)+'%';
+          }
+        }
+        video.onended = ()=>{ cancelAnimationFrame(raf); resolve(); };
+        await video.play();
+        renderFrame();
+      });
+    }
+
+    statusText.textContent='grabando...';
+    recorder.start();
+    srcNode.start();
+
+    if(concatMode){
+      for(let k=1;k<=levels;k++){
+        statusText.textContent = `grabando nivel ${k}/${levels}...`;
+        await playOneLevel(k, k-1, levels);
+      }
+    } else {
+      await playOneLevel(levels, 0, 1);
+    }
+
+    recorder.stop();
+    await stopped;
+
+    progressFill.style.width='100%';
+    statusText.className='status done';
+    statusText.textContent='¡listo! descargá tu video';
+
+    const blob = new Blob(chunks, {type:'video/webm'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href=url;
+    a.download='ihtx_output.webm';
+    a.className='download-btn';
+    a.textContent='⬇ DESCARGAR .WEBM';
+    resultBox.appendChild(a);
+    bumpExports();
+
+  }catch(err){
+    console.error(err);
+    statusText.className='status';
+    statusText.textContent='error: '+err.message;
+  }finally{
+    processBtn.disabled=false;
+  }
+};
+
+addPitch({label:'-3 st', semitones:-3});
+addPitch({label:'+2 st', semitones:2});
+renderChains();
+
+// ---- exports counter (interno, sin badge visual en la versión clásica) ----
+let exportCount = 0;
+function bumpExports(){ exportCount++; }
+
+// ---- audio DSP: noise gate / EQ / vocoder / vibrato ----
+function onePoleLowpass(x, sr, cutoff){
+  const rc=1/(2*Math.PI*Math.max(1,cutoff));
+  const dt=1/sr;
+  const alpha=dt/(rc+dt);
+  const y=new Float32Array(x.length);
+  let prev=0;
+  for(let i=0;i<x.length;i++){ prev = prev + alpha*(x[i]-prev); y[i]=prev; }
+  return y;
+}
+function bandpassSimple(x, sr, fLow, fHigh){
+  const low = onePoleLowpass(x, sr, fHigh);
+  const evenLower = onePoleLowpass(low, sr, fLow);
+  const bp = new Float32Array(x.length);
+  for(let i=0;i<x.length;i++) bp[i]=low[i]-evenLower[i];
+  return bp;
+}
+function envelopeFollower(x, sr, cutoff){
+  const rect = new Float32Array(x.length);
+  for(let i=0;i<x.length;i++) rect[i]=Math.abs(x[i]);
+  return onePoleLowpass(rect, sr, cutoff);
+}
+function applyNoiseGateChannel(input, sr, thresholdDb){
+  const threshold=Math.pow(10, thresholdDb/20);
+  const len=input.length;
+  const out=new Float32Array(len);
+  const attackCoef=Math.exp(-1/(sr*0.005));
+  const releaseCoef=Math.exp(-1/(sr*0.08));
+  let envelope=0, gain=0;
+  for(let i=0;i<len;i++){
+    const rectified=Math.abs(input[i]);
+    envelope = rectified>envelope ? attackCoef*envelope+(1-attackCoef)*rectified : releaseCoef*envelope+(1-releaseCoef)*rectified;
+    const targetGain = envelope>threshold?1:0;
+    gain = targetGain>gain ? attackCoef*gain+(1-attackCoef)*targetGain : releaseCoef*gain+(1-releaseCoef)*targetGain;
+    out[i]=input[i]*gain;
+  }
+  return out;
+}
+function applyEQChannel(input, sr, lowDb, midDb, highDb){
+  const low = onePoleLowpass(input, sr, 250);
+  const highForMid = onePoleLowpass(input, sr, 4000);
+  const len=input.length;
+  const out=new Float32Array(len);
+  const lowG=Math.pow(10,lowDb/20), midG=Math.pow(10,midDb/20), highG=Math.pow(10,highDb/20);
+  for(let i=0;i<len;i++){
+    const mid = highForMid[i]-low[i];
+    const high = input[i]-highForMid[i];
+    out[i]=low[i]*lowG + mid*midG + high*highG;
+  }
+  return out;
+}
+function applyVibratoChannel(input, sr, rateHz, depthMs){
+  const len=input.length;
+  const out=new Float32Array(len);
+  const depthSamples=depthMs/1000*sr;
+  const baseDelay=depthSamples+2;
+  for(let i=0;i<len;i++){
+    const mod=Math.sin(2*Math.PI*rateHz*i/sr);
+    const delay=baseDelay+depthSamples*mod;
+    const srcPos=i-delay;
+    const idx=Math.floor(srcPos), frac=srcPos-idx;
+    const s0=input[idx]||0, s1=input[idx+1]||0;
+    out[i]=s0+(s1-s0)*frac;
+  }
+  return out;
+}
+function applyVocoderChannel(input, sr, carrierFreq, mix){
+  const len=input.length;
+  const bands=[200,400,800,1600,3200,6400];
+  const carrier=new Float32Array(len);
+  for(let i=0;i<len;i++){ const t=i/sr; carrier[i]=2*((carrierFreq*t)%1)-1; }
+  const wet=new Float32Array(len);
+  for(const f of bands){
+    const bpMod=bandpassSimple(input, sr, f, f*0.6);
+    const env=envelopeFollower(bpMod, sr, 20);
+    const bpCarrier=bandpassSimple(carrier, sr, f, f*0.6);
+    for(let i=0;i<len;i++) wet[i]+=bpCarrier[i]*env[i];
+  }
+  let peak=0; for(let i=0;i<len;i++) peak=Math.max(peak,Math.abs(wet[i]));
+  if(peak>0){ const g=0.85/peak; for(let i=0;i<len;i++) wet[i]*=g; }
+  const out=new Float32Array(len);
+  for(let i=0;i<len;i++) out[i] = input[i]*(1-mix) + wet[i]*mix;
+  return out;
+}
+
+function applyAudioFX(buffer, audioCtx){
+  const ngOn = document.getElementById('ngEnabled').checked;
+  const eqOn = document.getElementById('eqEnabled').checked;
+  const vocOn = document.getElementById('vocEnabled').checked;
+  const vibOn = document.getElementById('vibEnabled').checked;
+  if(!ngOn && !eqOn && !vocOn && !vibOn) return buffer;
+
+  const ngThresh = parseFloat(document.getElementById('ngThreshold').value);
+  const eqLow = parseFloat(document.getElementById('eqLow').value);
+  const eqMid = parseFloat(document.getElementById('eqMid').value);
+  const eqHigh = parseFloat(document.getElementById('eqHigh').value);
+  const vocCarrier = parseFloat(document.getElementById('vocCarrier').value);
+  const vocMix = parseFloat(document.getElementById('vocMix').value)/100;
+  const vibRate = parseFloat(document.getElementById('vibRate').value);
+  const vibDepth = parseFloat(document.getElementById('vibDepth').value);
+
+  const sr = buffer.sampleRate;
+  const numCh = buffer.numberOfChannels;
+  const out = audioCtx.createBuffer(numCh, buffer.length, sr);
+  for(let ch=0; ch<numCh; ch++){
+    let d = buffer.getChannelData(ch).slice();
+    if(ngOn) d = applyNoiseGateChannel(d, sr, ngThresh);
+    if(eqOn) d = applyEQChannel(d, sr, eqLow, eqMid, eqHigh);
+    if(vibOn) d = applyVibratoChannel(d, sr, vibRate, vibDepth);
+    if(vocOn) d = applyVocoderChannel(d, sr, vocCarrier, vocMix);
+    out.getChannelData(ch).set(d);
+  }
+  return out;
+}
+
+function updateAudioFxSummary(){
+  const on = id => document.getElementById(id).checked ? 'on' : 'off';
+  document.getElementById('audioFxSummary').textContent =
+    `noise gate: ${on('ngEnabled')} · EQ: ${on('eqEnabled')} · vocoder: ${on('vocEnabled')} · vibrato: ${on('vibEnabled')}`;
+}
+[['ngEnabled',null],['eqEnabled',null],['vocEnabled',null],['vibEnabled',null]].forEach(([id])=>{
+  document.getElementById(id).addEventListener('change', updateAudioFxSummary);
+});
+
+function wireSlider(sliderId, valId, fmt){
+  const s=document.getElementById(sliderId), v=document.getElementById(valId);
+  const update=()=>{ v.textContent = fmt(s.value); };
+  s.oninput=update; update();
+}
+wireSlider('ngThreshold','ngThresholdVal', v=>v+'dB');
+wireSlider('eqLow','eqLowVal', v=>v+'dB');
+wireSlider('eqMid','eqMidVal', v=>v+'dB');
+wireSlider('eqHigh','eqHighVal', v=>v+'dB');
+wireSlider('vocCarrier','vocCarrierVal', v=>v+'Hz');
+wireSlider('vocMix','vocMixVal', v=>v+'%');
+wireSlider('vibRate','vibRateVal', v=>v+'Hz');
+wireSlider('vibDepth','vibDepthVal', v=>v+'ms');
+
+</script>
+</body>
+</html>
